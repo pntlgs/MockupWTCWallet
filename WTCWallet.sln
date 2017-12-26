@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2008
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WTCWallet", "WTCWallet\WTCWallet.csproj", "{42C21B02-ADB4-4C9B-90FB-3A0868DE010F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{42C21B02-ADB4-4C9B-90FB-3A0868DE010F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42C21B02-ADB4-4C9B-90FB-3A0868DE010F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42C21B02-ADB4-4C9B-90FB-3A0868DE010F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42C21B02-ADB4-4C9B-90FB-3A0868DE010F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D34FB2E2-1EAA-4D85-9ED0-E744653C1720}
+	EndGlobalSection
+EndGlobal

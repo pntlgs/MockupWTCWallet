@@ -1,0 +1,27 @@
+﻿<controls:MetroWindow x:Class="WTCWallet.EnterPassphraseWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WTCWallet"
+        xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+        ShowInTaskbar="False"
+        mc:Ignorable="d"  WindowStyle="ToolWindow" ResizeMode="NoResize" SizeToContent="WidthAndHeight" BorderThickness="1" BorderBrush="White"
+        Title="Enter Passphrase" Height="300" Width="300">
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <TextBlock Text="Enter Your Passphrase to Unlock this Wallet/Address" Grid.Row="0" Margin="5 2" FontSize="24"></TextBlock>
+        <TextBlock Text="Public Key:" Margin="5 2" FontSize="20" Grid.Row="1"></TextBlock>
+        <TextBox IsReadOnly="True" Grid.Row="2" Margin="5 2" FontSize="14" Text="{Binding PublicKey, Mode=OneWay}"></TextBox>
+        <TextBlock Text="Passphrase:" Margin="5 2" FontSize="20" Grid.Row="3"></TextBlock>
+        <TextBox Grid.Row="4" Margin="5 2" FontSize="14" Text="{Binding Passphrase, UpdateSourceTrigger=PropertyChanged}" KeyDown="UIElement_OnKeyDown"></TextBox>
+        <Button Command="{Binding ConfirmCommand}" x:Name="ConfirmButton" Content="Confirm Passphrase" Grid.Row="5" Margin="5 7 5 5" HorizontalAlignment="Left" Width="140"></Button>
+    </Grid>
+</controls:MetroWindow>
