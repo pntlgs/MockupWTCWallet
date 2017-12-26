@@ -1,9 +1,0 @@
-# Compiling from source
-- Open the solution in Visual Studio (likely 2017+ only for now1)
-- Build the solution in debug or release
-- Download the official WTC wallet, extra it and put it inside a wallet folder:
-bin -> Debug -> wallet
-- Rename the walton.exe file in that wallet folder to wtcbackend.exe
-
-
-This is so this wallet can run without affecting the official wtc wallet.
