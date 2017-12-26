@@ -1,10 +1,10 @@
 # Compiling from source
-1. Open the solution in Visual Studio (likely 2017+ only for now1)
+1. Open the solution in Visual Studio (likely 2017+ only for now)
 2. Build the solution in debug or release
-3. Download the official WTC wallet, extra it and put it inside a wallet folder.
+3. Download the official WTC wallet, extract it and put the contents inside a 'wallet' folder in the debug/release folder.
 
 It should look like this: bin -> Debug -> wallet
-4. Rename the walton.exe file in that wallet folder to wtcbackend.exe
+4. Rename the 'walton.exe' file in that wallet folder to be 'wtcbackend.exe'
 
 
-I'll try get some automatic build steps in for this in the future. You can look at the release download for an example layout - it has the wallet folder already in it.
+I'll try get some automatic build steps in for this in the future. You can look at the release download for an example file/folder layout - it has the wallet folder already setup.
