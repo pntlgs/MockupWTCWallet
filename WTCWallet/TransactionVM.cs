@@ -8,11 +8,11 @@ namespace WTCWallet
     public class TransactionVM : INotifyPropertyChanged
     {
         private string _blockNumber;
-        private string _receiver;
         private string _amount;
         private string _from;
         private string _to;
         private string _type;
+        private DateTime _date;
 
         public String BlockNumber
         {
@@ -25,6 +25,8 @@ namespace WTCWallet
                 OnPropertyChanged();
             }
         }
+
+        public Boolean HasLoadedAdditioinal { get; set; }
 
         public String From
         {
@@ -56,12 +58,12 @@ namespace WTCWallet
         {
             get
             {
-                if (From?.Length <= 10 || From == null)
+                if (From?.Length <= 20 || From == null)
                 {
                     return From;
                 }
 
-                return From.Substring(0, 5) + "..." + From.Substring(From.Length - 5);
+                return From.Substring(0, 10) + "..." + From.Substring(From.Length - 10);
             }
         }
 
@@ -69,12 +71,12 @@ namespace WTCWallet
         {
             get
             {
-                if (To?.Length <= 10 || To == null)
+                if (To?.Length <= 20 || To == null)
                 {
                     return To;
                 }
 
-                return To.Substring(0, 5) + "..." + To.Substring(To.Length - 5);
+                return To.Substring(0, 10) + "..." + To.Substring(To.Length - 10);
             }
         }
 
@@ -103,31 +105,6 @@ namespace WTCWallet
             }
         }
 
-        public String Receiver
-        {
-            get { return _receiver; }
-            set
-            {
-                if (_receiver == value)
-                    return;
-                _receiver = value;
-                OnPropertyChanged();
-                OnPropertyChanged("ReceiverShort");
-            }
-        }
-
-        public String ReceiverShort
-        {
-            get
-            {
-
-                if (Receiver.Length <= 30 || Receiver == null)
-                    return Receiver;
-
-                return Receiver.Substring(0, 15) + "..." + Receiver.Substring(Receiver.Length - 15);
-
-            }
-        }
 
         public String Amount
         {
@@ -147,6 +124,33 @@ namespace WTCWallet
         }
 
         public Boolean IsPending { get; set; }
+
+        public DateTime Date
+        {
+            get { return _date; }
+            set
+            {
+                if (_date == value)
+                    return;
+                _date = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public TransactionVM Clone()
+        {
+            var vm = new TransactionVM();
+            vm.Date = Date;
+            vm.From = From;
+            vm.Hash = Hash;
+            vm.To = To;
+            vm.Type = Type;
+            vm.Amount = Amount;
+            vm.BlockNumber = BlockNumber;
+            vm.HasLoadedAdditioinal = HasLoadedAdditioinal;
+            vm.IsPending = IsPending;
+            return vm;
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

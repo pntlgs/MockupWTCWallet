@@ -21,7 +21,7 @@
         <TextBlock Text="Public Key:" Margin="5 2" FontSize="20" Grid.Row="1"></TextBlock>
         <TextBox IsReadOnly="True" Grid.Row="2" Margin="5 2" FontSize="14" Text="{Binding PublicKey, Mode=OneWay}"></TextBox>
         <TextBlock Text="Passphrase:" Margin="5 2" FontSize="20" Grid.Row="3"></TextBlock>
-        <TextBox Grid.Row="4" Margin="5 2" FontSize="14" Text="{Binding Passphrase, UpdateSourceTrigger=PropertyChanged}" KeyDown="UIElement_OnKeyDown"></TextBox>
+        <PasswordBox Grid.Row="4" Margin="5 2" FontSize="14" x:Name="PasswordBox" KeyDown="UIElement_OnKeyDown"></PasswordBox>
         <Button Command="{Binding ConfirmCommand}" x:Name="ConfirmButton" Content="Confirm Passphrase" Grid.Row="5" Margin="5 7 5 5" HorizontalAlignment="Left" Width="140"></Button>
     </Grid>
 </controls:MetroWindow>

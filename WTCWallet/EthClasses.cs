@@ -240,21 +240,7 @@ namespace WTCWallet
                         vm.Hash = rowChildNode.InnerText.Trim();
                     }
                     else if (i == 2)
-                    {
-                        vm.Receiver = rowChildNode.InnerText.Trim();
-
-                        if (vm.Receiver == address)
-                        {
-                            vm.Type = "Recieve WTC";
-                            vm.From = vm.Receiver;
-                            vm.To = address;
-                        }
-                        else
-                        {
-                            vm.Type = "Send WTC";
-                            vm.From = address;
-                            vm.To = vm.Receiver;
-                        }
+                    { 
                     }
                     else if (i == 3)
                     {

@@ -23,6 +23,14 @@ namespace WTCWallet
         public EnterPassphraseWindow()
         {
             InitializeComponent();
+
+            DataContextChanged += OnDataContextChanged;
+        }
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+        {
+            var vm = ((EnterPassphraseVM) DataContext);
+            vm.GetPassphrase = () => PasswordBox.Password;
         }
 
         private void UIElement_OnKeyDown(object sender, KeyEventArgs e)

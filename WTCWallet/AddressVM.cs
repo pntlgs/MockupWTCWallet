@@ -99,12 +99,25 @@ namespace WTCWallet
             get { return _copySenderAddressCommand ?? (_copySenderAddressCommand = new BaseCommand(CopySenderAddress)); }
         }
 
+        public BaseCommand CopyReceiverAddressCommand
+        {
+            get { return _copyReceiverAddressCommand ?? (_copyReceiverAddressCommand = new BaseCommand(CopyReceiverAddress)); }
+        }
+
+        private void CopyReceiverAddress(object obj)
+        {
+            if (Transaction == null)
+                return;
+
+            Clipboard.SetText(Transaction.To, TextDataFormat.Text);
+        }
+
         private void CopySenderAddress(object obj)
         {
             if (Transaction == null)
                 return;
 
-            Clipboard.SetText(Transaction.Receiver, TextDataFormat.Text);
+            Clipboard.SetText(Transaction.From, TextDataFormat.Text);
         }
 
         public BaseCommand CopyTransactionHashCommand
@@ -203,7 +216,7 @@ namespace WTCWallet
             try
             {
                 var unlockAccountResult =
-                    Task.Run(() => AppVM.Geth.Personal.UnlockAccount.SendRequestAsync(PublicKey, vm.Passphrase, 60)).Result;
+                    Task.Run(() => AppVM.Geth.Personal.UnlockAccount.SendRequestAsync(PublicKey, vm.GetPassphrase(), 60)).Result;
 
                 if (!unlockAccountResult)
                 {
@@ -218,7 +231,14 @@ namespace WTCWallet
 
                 var id = Task.Run(() => AppVM.Geth.Eth.TransactionManager.SendTransactionAsync(PublicKey, SendAddress, new HexBigInteger(new BigInteger(amount)))).Result;
 
-                Transactions.Insert(0, new TransactionVM {Hash = id, Amount = SendAmount.ToString(), Receiver = SendAddress, BlockNumber = "Pending", IsPending = true, Type = "Send WTC", From = PublicKey, To = SendAddress});
+         
+
+                Transactions.Insert(0, new TransactionVM {Hash = id, Amount = SendAmount.ToString(), To = SendAddress, BlockNumber = "Pending", IsPending = true, Type = "Sent WTC", From = PublicKey, Date = DateTime.Now});
+
+                if (SendAddress.ToUpper() == PublicKey.ToUpper())
+                {
+                    Transactions.Insert(0, new TransactionVM { Hash = id, Amount = SendAmount.ToString(), To = SendAddress, BlockNumber = "Pending", IsPending = true, Type = "Received WTC", From = PublicKey, Date = DateTime.Now });
+                }
 
                 Task.Run(() => AppVM.Geth.Personal.LockAccount.SendRequestAsync(PublicKey)).Wait();
 
@@ -270,6 +290,7 @@ namespace WTCWallet
         private string _miningStatus = "MINING STATUS: NOT MINING";
         private string _nodeStatus = "CONNECTED NODES: 0";
         private BlockVM _minerBlock;
+        private BaseCommand _copyReceiverAddressCommand;
 
         private void LoadTransactions(Boolean showSpinner, Action loaded = null)
         {
@@ -290,17 +311,46 @@ namespace WTCWallet
                 {
                     foreach (var transactionVm in Service.GetLatestTransactions(PublicKey, 1).ToList())
                     {
-                        var tr = Transactions.FirstOrDefault(t => t.Hash == transactionVm.Hash);
-                        if (tr == null)
+                        var tr = Transactions.Where(t => t.Hash == transactionVm.Hash).ToArray();
+
+                        if (!tr.Any())
                         {
+                            var detail = AppVM.Geth.Eth.Transactions.GetTransactionByHash.SendRequestAsync(transactionVm.Hash).GetAwaiter()
+                                .GetResult();
+
+                            if (detail == null)
+                                continue;
+
+                            var block =
+                                AppVM.Geth.Eth.Blocks.GetBlockWithTransactionsByHash.SendRequestAsync(detail.BlockHash)
+                                    .GetAwaiter().GetResult();
+
+                            if (block == null)
+                                continue;
+
+                            transactionVm.From = detail.From;
+                            transactionVm.To = detail.To;
+                            transactionVm.Type = detail.From == PublicKey ? "Sent WTC" : "Received WTC";
+
+                            transactionVm.Date = new DateTime(1970, 1, 1).AddSeconds((double)block.Timestamp.Value);
+
+                            if (detail.From == detail.To)
+                            {
+                                var clone = transactionVm.Clone();
+                                clone.Type = "Received WTC";
+                                Application.Current.Dispatcher.Invoke(() => Transactions.Add(clone));
+                            }
+
                             Application.Current.Dispatcher.Invoke(() => Transactions.Add(transactionVm));
                         }
                         else
                         {
-                            tr.BlockNumber = transactionVm.BlockNumber;
-                            tr.Amount = transactionVm.Amount;
-                            tr.Receiver = transactionVm.Receiver;
-                            tr.IsPending = false;
+                            foreach (var t in tr.Where(t => t.IsPending))
+                            {
+                                t.BlockNumber = transactionVm.BlockNumber;
+                                t.Amount = transactionVm.Amount;
+                                t.IsPending = false;
+                            }
                         }
                     }
 

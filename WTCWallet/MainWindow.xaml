@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:WTCWallet"
         xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls" BorderBrush="#0D2E60" BorderThickness="2" NonActiveBorderBrush="#0D2E60" NonActiveWindowTitleBrush="{DynamicResource WindowTitleColorBrush}"
         mc:Ignorable="d" Background="#081F40" ShowMaxRestoreButton="False" WindowStyle="SingleBorderWindow" ResizeMode="CanMinimize"
-        Title="WTC Wallet" Height="550" Width="1000" MinHeight="450" MinWidth="750" DataContext="{x:Static local:AppVM.Instance}" Icon="Resources/walton.png">
+        Title="WTC Wallet" Height="550" Width="1000" DataContext="{x:Static local:AppVM.Instance}" Icon="Resources/walton.png">
     <!-- Initial design from StarlikeLOL-->
     <Grid>
         <Grid.RowDefinitions>
@@ -350,7 +350,13 @@
                                                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Text="BALANCE"  FontFamily="{StaticResource Anton}" FontWeight="SemiBold" Foreground="#BEC0C5" FontSize="16" Margin="0 20 0 0" HorizontalAlignment="Center" Grid.Row="0"></TextBlock>
-                                            <TextBlock Grid.Column="0" Grid.ColumnSpan="2"  Text="{Binding Address.Balance.Balance, StringFormat={}{0} WTC}"  FontFamily="{StaticResource Anton}" TextWrapping="Wrap" Foreground="#00BDFD" FontSize="30" FontWeight="Bold" HorizontalAlignment="Center" Grid.Row="1"></TextBlock>
+                                            <TextBlock Grid.Column="0" Grid.ColumnSpan="2"  Text="{Binding Address.Balance.Balance, StringFormat={}{0} WTC}"  FontFamily="{StaticResource Anton}" TextWrapping="Wrap" Foreground="#00BDFD" FontSize="30" FontWeight="Bold" HorizontalAlignment="Center" Grid.Row="1">
+                                                <TextBlock.ContextMenu>
+                                                    <ContextMenu>
+                                                        <MenuItem Header="Copy Balance" Command="{Binding Address.CopyBalanceCommand}"></MenuItem>
+                                                    </ContextMenu>
+                                                </TextBlock.ContextMenu>
+                                            </TextBlock>
                                             <TextBox  Grid.Column="0" Grid.ColumnSpan="2"  Grid.Row="2" Margin="20 15 20 5" FontFamily="{StaticResource Anton}" controls:TextBoxHelper.Watermark="Receiver Address" Text="{Binding Address.SendAddress}"></TextBox>
                                             <TextBox Grid.Column="0" Grid.Row="3" Margin="20 5 10 5" controls:TextBoxHelper.Watermark="Amount to Send" FontFamily="{StaticResource Anton}" Text="{Binding Address.SendAmount}"></TextBox>
                                             <Button Grid.Row="3" Margin="0 5 20 5" Content="Entire Balance" FontFamily="{StaticResource Anton}" Grid.Column="1" Command="{Binding Address.EntireBalanceCommand}"></Button>
@@ -404,15 +410,18 @@
                                                         </DataGrid.Resources>
                                                         <DataGrid.Columns>
                                                             <DataGridTextColumn Header="Block #" Binding="{Binding BlockNumber}"></DataGridTextColumn>
-                                                            <DataGridTextColumn Header="Transaction Hash" Binding="{Binding HashShort}"></DataGridTextColumn>
-                                                            <DataGridTextColumn Header="Sender Address" Binding="{Binding ReceiverShort, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                                                            <DataGridTextColumn Header="Date" Binding="{Binding Date}"></DataGridTextColumn>
+                                                            <DataGridTextColumn Header="Type" Binding="{Binding Type}"></DataGridTextColumn>
                                                             <DataGridTextColumn Header="Amount" Binding="{Binding Amount}"></DataGridTextColumn>
+                                                            <DataGridTextColumn Header="From" Binding="{Binding FromShort}"></DataGridTextColumn>
+                                                            <DataGridTextColumn Header="To" Binding="{Binding ToShort}"></DataGridTextColumn>
                                                         </DataGrid.Columns>
                                                         <DataGrid.ContextMenu>
                                                             <ContextMenu Visibility="{Binding Address.HasTransaction, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                                 <MenuItem Header="Open in WaltonChain Explorer" Command="{Binding Address.OpenExplorerCommand}" />
                                                                 <MenuItem Header="Copy Transaction Hash" Command="{Binding Address.CopyTransactionHashCommand}" />
-                                                                <MenuItem Header="Copy Sender Address" Command="{Binding Address.CopySenderAddressCommand}" />
+                                                                <MenuItem Header="Copy From Address" Command="{Binding Address.CopySenderAddressCommand}" />
+                                                                <MenuItem Header="Copy To Address" Command="{Binding Address.CopyReceiverAddressCommand}" />
                                                             </ContextMenu>
                                                         </DataGrid.ContextMenu>
                                                     </DataGrid>

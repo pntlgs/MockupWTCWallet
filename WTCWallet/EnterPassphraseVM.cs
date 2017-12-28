@@ -13,7 +13,6 @@ namespace WTCWallet
     {
         private readonly Action _closeWindowAction;
         private BaseCommand _confirmCommand;
-        private string _passphrase = "";
         public string PublicKey { get; }
 
         public EnterPassphraseVM(Action closeWindowAction, string publicKey)
@@ -24,20 +23,12 @@ namespace WTCWallet
 
         public Boolean Confirmed { get; set; }
 
-        public String Passphrase
-        {
-            get { return _passphrase; }
-            set
-            {
-                _passphrase = value;
-                OnPropertyChanged();
-            }
-        }
-
         public BaseCommand ConfirmCommand
         {
             get { return _confirmCommand ?? (_confirmCommand = new BaseCommand(Confirm)); }
         }
+
+        public Func<String> GetPassphrase { get; set; }
 
         private void Confirm(object obj)
         {
