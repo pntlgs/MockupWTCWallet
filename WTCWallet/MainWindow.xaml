@@ -322,7 +322,7 @@
 
                                             <TextBlock Foreground="White" HorizontalAlignment="Center" Margin="10" FontSize="14" FontFamily="{StaticResource Anton}" >
                                                 <Hyperlink NavigateUri="https://github.com/pntlgs/MockupWTCWallet/releases" RequestNavigate="Hyperlink_RequestNavigate">
-                                                    <Run Text="Version: 0.3" Foreground="White"></Run>
+                                                    <Run Text="Version: 0.3.1" Foreground="White"></Run>
                                                 </Hyperlink>
                                             </TextBlock>
                                         </StackPanel>
@@ -458,7 +458,7 @@
                                                     <Button Grid.Row="0" Grid.Column="1" Margin="5 0 0 0" FontSize="14" FontFamily="{DynamicResource Anton}" IsEnabled="{Binding Address.IsNotMining}" Command="{Binding  Address.StartMiningCommand}" Content="Start Mining"></Button>
                                                     <Button Grid.Row="0" Grid.Column="2" FontSize="14" Margin="5 0 0 0" FontFamily="{DynamicResource Anton}"  IsEnabled="{Binding Address.IsMining}" Command="{Binding Address.StopMiningCommand}" Content="Stop Mining"></Button>
                                                     <controls:ProgressRing IsActive="{Binding Address.ShowTransactionsSpinner}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" />
-                                                    <DataGrid Margin="0 5 0 0" Foreground="White" AlternatingRowBackground="#092246" RowBackground="#092953"  Background="#081F40" FontFamily="{StaticResource Anton}" Grid.Column="0" Grid.ColumnSpan="3" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False" AutoGenerateColumns="False" VerticalScrollBarVisibility="Hidden"  SelectedItem="{Binding Address.MinerBlock}" IsReadOnly="True" SelectionMode="Single" Grid.Row="1" SelectionUnit="FullRow" ItemsSource="{Binding Address.MinerBlocks}" Visibility="{Binding Address.IsTransactionsDone, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <DataGrid Margin="0 5 0 5" Foreground="White" AlternatingRowBackground="#092246" RowBackground="#092953"  Background="#081F40" FontFamily="{StaticResource Anton}" Grid.Column="0" Grid.ColumnSpan="3" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False" AutoGenerateColumns="False" VerticalScrollBarVisibility="Hidden"  SelectedItem="{Binding Address.MinerBlock}" IsReadOnly="True" SelectionMode="Single" Grid.Row="1" SelectionUnit="FullRow" ItemsSource="{Binding Address.MinerBlocks}" Visibility="{Binding Address.IsTransactionsDone, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                         <DataGrid.Columns>
                                                             <DataGridTextColumn Header="Block #" Binding="{Binding BlockNumber}"></DataGridTextColumn>
                                                             <DataGridTextColumn Header="Date" Binding="{Binding Date}"></DataGridTextColumn>

@@ -372,7 +372,7 @@ namespace WTCWallet
             {
                 try
                 {
-                    foreach (var transactionVm in Service.GetLatestTransactions(PublicKey, 1).ToList())
+                    foreach (var transactionVm in Service.GetLatestTransactions(PublicKey, 1).Reverse().ToList())
                     {
                         var tr = Transactions.Where(t => t.Hash == transactionVm.Hash).ToArray();
 
@@ -401,10 +401,10 @@ namespace WTCWallet
                             {
                                 var clone = transactionVm.Clone();
                                 clone.Type = "Received WTC";
-                                Application.Current.Dispatcher.Invoke(() => Transactions.Add(clone));
+                                Application.Current.Dispatcher.Invoke(() => Transactions.Insert(0, clone));
                             }
 
-                            Application.Current.Dispatcher.Invoke(() => Transactions.Add(transactionVm));
+                            Application.Current.Dispatcher.Invoke(() => Transactions.Insert(0, transactionVm));
                         }
                         else
                         {
@@ -417,7 +417,7 @@ namespace WTCWallet
                         }
                     }
 
-                    foreach (var blockVM in Service.GetMinerBlocks(PublicKey, 1).ToList())
+                    foreach (var blockVM in Service.GetMinerBlocks(PublicKey, 1).Reverse().ToList())
                     {
                         var tr = MinerBlocks.FirstOrDefault(t => t.Hash == blockVM.Hash);
                         if (tr == null)
@@ -426,10 +426,13 @@ namespace WTCWallet
                                 AppVM.Geth.Eth.Blocks.GetBlockWithTransactionsByHash.SendRequestAsync(blockVM.Hash)
                                     .GetAwaiter().GetResult();
 
+                            if (block == null)
+                                continue;
+
                             blockVM.Date = new DateTime(1970, 1, 1).AddSeconds((double)block.Timestamp.Value);
                             blockVM.TransactionCount = block.Transactions.Length;
 
-                            Application.Current.Dispatcher.Invoke(() => MinerBlocks.Add(blockVM));
+                            Application.Current.Dispatcher.Invoke(() => MinerBlocks.Insert(0, blockVM));
                         }
                     }
 
