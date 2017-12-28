@@ -6,7 +6,7 @@
         xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls" ShowInTaskbar="False" NonActiveBorderBrush="#0D2E60" NonActiveWindowTitleBrush="{DynamicResource WindowTitleColorBrush}" BorderThickness="4" BorderBrush="#0D2E60" 
         mc:Ignorable="d" ResizeMode="NoResize"  SizeToContent="WidthAndHeight" ShowMaxRestoreButton="False" ShowMinButton="False" ShowCloseButton="True" Closing="WelcomeWindow_OnClosing"
         Title="Unofficial WTC Wallet" Height="450" Width="700">
-    <Grid Margin="5" MaxWidth="650">
+    <Grid Margin="5" MaxWidth="750">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -42,7 +42,7 @@
                     <RowDefinition Height="Auto"></RowDefinition>
                 </Grid.RowDefinitions>
                 <CheckBox IsEnabled="False" Content="Waiting for the wallet service to start" x:Name="ServiceCheckBox" Grid.Row="0" FontSize="18"></CheckBox>
-                <CheckBox IsEnabled="False" Content="Waiting for the blockchain to download" x:Name="DownloadCheckBox" Margin="0 5 0 0" Grid.Row="1" FontSize="18"></CheckBox>
+                <CheckBox IsEnabled="False" Content="Searching for nodes to start the blockchain download (this may take a minute)" x:Name="DownloadCheckBox" Margin="0 5 0 0" Grid.Row="1" FontSize="18"></CheckBox>
             </Grid>
         </GroupBox>
 

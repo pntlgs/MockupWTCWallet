@@ -94,7 +94,8 @@ namespace WTCWallet
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 DownloadCheckBox.Content =
-                                    "The blockchain is downloading (" + syncResult.CurrentBlock.Value + " of " + syncResult.HighestBlock.Value + " blocks).";
+                                    "The blockchain is downloading (" + syncResult.CurrentBlock.Value + " of " +
+                                    syncResult.HighestBlock.Value + " blocks).";
                             });
                         }
                         else
@@ -109,6 +110,21 @@ namespace WTCWallet
                             });
                             break;
                         }
+                    }
+                    else
+                    {
+                        var nodeCount = AppVM.Geth.Admin.Peers.SendRequestAsync().GetAwaiter().GetResult().Children()
+                            .Count();
+
+                        if (nodeCount == 0)
+                        {
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                DownloadCheckBox.Content =
+                                    "Searching for nodes to start the blockchain download (this may take a minute)";
+                            });
+                        }
+
                     }
 
                     Thread.Sleep(1000);

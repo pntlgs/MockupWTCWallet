@@ -314,7 +314,7 @@
                                             <Button Content="CREATE WALLET" Padding="10" controls:ControlsHelper.ContentCharacterCasing="Upper"  Command="{Binding NewAccountCommand}" Margin="10" FontFamily="{StaticResource Anton}" FontSize="28"></Button>
                                             <Button Content="OPEN WALLET" Padding="10" controls:ControlsHelper.ContentCharacterCasing="Upper" Command="{Binding OpenAccountCommand}" Margin="10" FontFamily="{StaticResource Anton}" FontSize="28"></Button>
                                            
-                                            <TextBlock Foreground="White" Text="Version: 0.2" HorizontalAlignment="Center" Margin="10"></TextBlock>
+                                            <TextBlock Foreground="White" Text="Version: 0.3" HorizontalAlignment="Center" Margin="10"></TextBlock>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
