@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using Nethereum.Hex.HexTypes;
 using Nethereum.JsonRpc.Client;
 using WTCWallet.Annotations;
+using Timer = System.Windows.Forms.Timer;
 
 namespace WTCWallet
 {
@@ -259,7 +260,66 @@ namespace WTCWallet
             }
         }
 
-        private System.Windows.Forms.Timer Timer
+        public System.Windows.Forms.Timer MiningTimer
+        {
+            get
+            {
+                if (_miningTimer == null)
+                {
+                    _miningTimer = new System.Windows.Forms.Timer
+                    {
+                        Enabled = false,
+                        Interval = (int)TimeSpan.FromSeconds(5).TotalMilliseconds
+                    };
+
+                    _miningTimer.Tick += delegate
+                    {
+                        RefreshHashrate();
+                    };
+                }
+
+
+                return _miningTimer;
+            }
+        }
+
+        private void RefreshHashrate()
+        {
+            if (!IsMining)
+            {
+                MiningTimer.Stop();
+                HashRate = null;
+                return;
+            }
+
+            try
+            {
+                CustomMinerApiService minerService = new CustomMinerApiService(AppVM.Geth.Client);
+                var hashRate = (int)new Int32Converter().ConvertFromString(minerService.MinerHashrate.SendRequestAsync().GetAwaiter().GetResult());
+                HashRate = hashRate;
+            }
+            catch (Exception e)
+            {
+             
+            }
+        }
+
+        public int? HashRate
+        {
+            get { return _hashRate; }
+            set
+            {
+                if (_hashRate == value)
+                    return;
+                _hashRate = value;
+                OnPropertyChanged();
+                OnPropertyChanged("HasHashRate");
+            }
+        }
+
+        public Boolean HasHashRate => HashRate != null;
+
+        private System.Windows.Forms.Timer RefreshTimer
         {
             get
             {
@@ -268,11 +328,12 @@ namespace WTCWallet
                     _timer = new System.Windows.Forms.Timer
                     {
                         Enabled = false,
-                        Interval = (int) TimeSpan.FromSeconds(15).TotalMilliseconds
+                        Interval = (int) TimeSpan.FromSeconds(13).TotalMilliseconds
                     };
 
                     _timer.Tick += delegate
                     {
+                        LoadBalance();
                         LoadTransactions(false);
                     };
                 }
@@ -291,6 +352,8 @@ namespace WTCWallet
         private string _nodeStatus = "CONNECTED NODES: 0";
         private BlockVM _minerBlock;
         private BaseCommand _copyReceiverAddressCommand;
+        private Timer _miningTimer;
+        private int? _hashRate;
 
         private void LoadTransactions(Boolean showSpinner, Action loaded = null)
         {
@@ -359,6 +422,13 @@ namespace WTCWallet
                         var tr = MinerBlocks.FirstOrDefault(t => t.Hash == blockVM.Hash);
                         if (tr == null)
                         {
+                            var block =
+                                AppVM.Geth.Eth.Blocks.GetBlockWithTransactionsByHash.SendRequestAsync(blockVM.Hash)
+                                    .GetAwaiter().GetResult();
+
+                            blockVM.Date = new DateTime(1970, 1, 1).AddSeconds((double)block.Timestamp.Value);
+                            blockVM.TransactionCount = block.Transactions.Length;
+
                             Application.Current.Dispatcher.Invoke(() => MinerBlocks.Add(blockVM));
                         }
                     }
@@ -463,8 +533,8 @@ namespace WTCWallet
         private void StopMining(object obj)
         {
             IsMining = false;
-
-
+            MiningTimer.Stop();
+            HashRate = null;
 
             try
             {
@@ -595,6 +665,8 @@ namespace WTCWallet
                 return;
             }
 
+
+    
             Thread.Sleep(2000);
 
             if (AppVM.ProcessID.HasValue)
@@ -611,6 +683,8 @@ namespace WTCWallet
             }
 
             IsMining = true;
+
+            MiningTimer.Start();
 
 
             //   Service.StartMining(PublicKey, Password, MiningSliderValue);
@@ -646,7 +720,7 @@ namespace WTCWallet
 
             LoadTransactions(true);
 
-            Timer.Start();
+            RefreshTimer.Start();
         }
 
         private void LoadBalance()

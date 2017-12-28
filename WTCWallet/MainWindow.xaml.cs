@@ -38,6 +38,12 @@ Activated += OnLoaded;
             ((AppVM) DataContext).SelectTab = SelectTab;
         }
 
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+            e.Handled = true;
+        }
+
         private void SelectTab(string label)
         {
             var coll = ((HamburgerMenuItemCollection)HamburgerMenuControl.ItemsSource);

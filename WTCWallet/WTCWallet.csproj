@@ -158,6 +158,7 @@
     <Compile Include="EnterPassphraseWindow.xaml.cs">
       <DependentUpon>EnterPassphraseWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GethHashRate.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="NewAddressVM.cs" />
     <Compile Include="NewAddressWindow.xaml.cs">

@@ -25,6 +25,18 @@ namespace WTCWallet
 
         public String Hash { get; set; }
 
+        public String HashShort
+        {
+            get
+            {
+                if (Hash.Length <= 30 || Hash == null)
+                    return Hash;
+
+                return Hash.Substring(0, 15) + "..." + Hash.Substring(Hash.Length - 15);
+            }
+        }
+
+
         public String Reward { get; set; }
 
         public String Nounce { get; set; }
@@ -36,6 +48,9 @@ namespace WTCWallet
         {
             get { return _openExplorerCommand ?? (_openExplorerCommand = new BaseCommand(OpenExplorer)); }
         }
+
+        public DateTime Date { get; set; }
+        public int TransactionCount { get; set; }
 
         private void OpenExplorer(object obj)
         {
