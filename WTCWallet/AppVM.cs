@@ -4,13 +4,21 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Management;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Forms;
 using Nethereum.Geth;
 using Nethereum.JsonRpc.Client;
+using Nethereum.KeyStore;
+using Newtonsoft.Json;
 using WTCWallet.Annotations;
+using Application = System.Windows.Application;
+using MessageBox = System.Windows.MessageBox;
+using Timer = System.Windows.Forms.Timer;
 
 namespace WTCWallet
 {
@@ -23,20 +31,35 @@ namespace WTCWallet
         private string _miningStatus;
         private BaseCommand _newAccountCommand;
         private BaseCommand _openAccountCommand;
+        private string _nodeStatus;
+
+        public Boolean ShowHome => Address == null;
+        private Timer _cmcTimer = new Timer();
 
         public static void RestartBackend()
         {
-            //Get rid of any old lingering backend processes
-            foreach (var process1 in Process.GetProcessesByName("wtcbackend"))
+            if (Process.GetProcessesByName("WaltonWallet").Any())
             {
-                process1.Kill();
+                Application.Current.Dispatcher.Invoke(() => MessageBox.Show("Please close the official Walton Wallet first.", "Wallet", MessageBoxButton.OK, MessageBoxImage.Information));
+                Environment.Exit(0);
+            }
+
+            foreach (var p in Process.GetProcessesByName("walton"))
+            {
+                p.Kill();
+            }
+
+            if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "wallet\\walton.exe")))
+            {
+                Application.Current.Dispatcher.Invoke(() => MessageBox.Show("Failed to find the walton.exe file."));
+                Environment.Exit(0);
             }
 
             //Init the wallet data dir
             if (!Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "wallet/walletnode")))
             {
                 ProcessStartInfo genInfo = new ProcessStartInfo(
-                    Path.Combine(Directory.GetCurrentDirectory(), "wallet\\wtcbackend.exe"),
+                    Path.Combine(Directory.GetCurrentDirectory(), "wallet\\walton.exe"),
                     "--datadir walletnode init genesis.json");
 
                 genInfo.CreateNoWindow = true;
@@ -49,8 +72,8 @@ namespace WTCWallet
 
             //Start the backend process
             ProcessStartInfo info = new ProcessStartInfo(
-                Path.Combine(Directory.GetCurrentDirectory(), "wallet\\wtcbackend.exe"),
-                "--identity \"development\" --rpc --ipcdisable --rpcaddr 127.0.0.1 --rpccorsdomain \"*\"  --datadir \"walletnode\" --port \"30304\" --rpcapi \"admin,personal,db,eth,net,web3,miner\" --networkid 999 --rpcport 8546 console");
+                Path.Combine(Directory.GetCurrentDirectory(), "wallet\\walton.exe"),
+                "--identity \"mockupwtcwallet\" --rpc --ipcdisable --rpcaddr 127.0.0.1 --rpccorsdomain \"*\"  --datadir \"walletnode\" --port \"30304\" --rpcapi \"admin,personal,db,eth,net,web3,miner\" --networkid 999 --rpcport 8546 console");
 
             info.CreateNoWindow = true;
             info.UseShellExecute = false;
@@ -58,7 +81,7 @@ namespace WTCWallet
 
             if (!File.Exists(info.FileName))
             {
-                MessageBox.Show("Failed to find " + info.FileName, "Wallet");
+                Application.Current.Dispatcher.Invoke(() => MessageBox.Show("Failed to find " + info.FileName, "Wallet"));
                 Environment.Exit(0);
 
             }
@@ -69,7 +92,7 @@ namespace WTCWallet
 
             if (process.HasExited)
             {
-                MessageBox.Show("Failed to connect to the WTC RPC. The wallet will now close.");
+                Application.Current.Dispatcher.Invoke(() => MessageBox.Show("Failed to connect to the WTC RPC. The wallet will now close."));
                 Environment.Exit(0);
             }
 
@@ -78,76 +101,139 @@ namespace WTCWallet
 
         private AppVM()
         {
+            MaxMiningThreads = 16;
+            MiningSliderValue = Environment.ProcessorCount;
+            _cmcTimer.Interval = (int)TimeSpan.FromMinutes(5).TotalMilliseconds;
+            _cmcTimer.Tick += CmcTimerOnTick;
+            _cmcTimer.Start();
+            CmcTimerOnTick(this, EventArgs.Empty);
+        }
 
-
-
-
-            Task.Run(() =>
+        public String USDPrice
+        {
+            get { return _usdPrice; }
+            set
             {
-                RestartBackend();
-            });
+                _usdPrice = value;
+                OnPropertyChanged();
+            }
+        }
 
-            LoadAccounts();
+        public String BTCPrice
+        {
+            get { return _btcPrice; }
+            set
+            {
+                _btcPrice = value;
+                OnPropertyChanged();
+            }
+        }
 
-            Status = "Ready";
-            MiningStatus = "No miner running";
-          }
+        public decimal Percent24HourChange
+        {
+            get { return _percent24HourChange; }
+            set
+            {
+                _percent24HourChange = value; 
+                OnPropertyChanged();
+            }
+        }
+
+        public Boolean IsPercentPositive
+        {
+            get { return _isPercentPositive; }
+            set
+            {
+                if (_isPercentPositive == value)
+                    return;
+                _isPercentPositive = value; 
+                OnPropertyChanged();
+            }
+        }
+
+        private void CmcTimerOnTick(object sender, EventArgs eventArgs)
+        {
+            try
+            {
+                WebClient client = new WebClient();
+                var tickerInfo = client.DownloadString("https://api.coinmarketcap.com/v1/ticker/walton/");
+
+                var responses = JsonConvert.DeserializeObject<CMCResponse[]>(tickerInfo);
+                var response = responses.FirstOrDefault();
+                if(response == null)
+                    return;
+
+                var priceusd = decimal.Parse(response.price_usd);
+                USDPrice = "$" + priceusd.ToString("N");
+                BTCPrice = response.price_btc + " BTC";
+                Percent24HourChange = decimal.Parse(response.percent_change_24h);
+                IsPercentPositive = Percent24HourChange >= 0;
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
 
         internal static Web3Geth Geth { get; set; } = new Web3Geth(new WalletConfigurationService().Client);
 
         public static int? ProcessID { get; set; }
 
-        private void LoadAccounts(bool selectNewAccount = false)
+        private void LoadAccountsAsync(string publicKey)
         {
-            int failCounter = 0;
-            while (true)
+            Task.Run(() =>
             {
-                if (failCounter >= 10)
-                    break;
+                LoadAccounts(publicKey);
+            });
+        }
 
-                try
+        private void LoadAccounts(string publicKey)
+        {
+            int retryCount = 0;
+
+            try
+            {
+                start:
+
+                var accs = AppVM.Geth.Personal.ListAccounts.SendRequestAsync().GetAwaiter().GetResult();
+
+                if (accs.Length > 1 || !accs.Contains(publicKey))
                 {
-                    foreach (var s in AppVM.Geth.Personal.ListAccounts.SendRequestAsync().GetAwaiter().GetResult())
+                    if (retryCount++ < 20)
                     {
-                        if (Addresses.Any(a => a.PublicKey == s))
-                            continue;
-
-                        var address = new AddressVM(UpdateMinerStatus) {PublicKey = s};
-
-                        Addresses.Add(address);
-
-                        if (selectNewAccount)
-                        {
-                            Address = address;
-                        }
+                        Thread.Sleep(500);
+                        goto start;
                     }
 
-
-
-                    break;
-
+                    Application.Current.Dispatcher.Invoke(() =>
+                        MessageBox.Show(
+                            "There is a bug in the wallet - two wallets are loaded at once. \r\nPlease reopen the wallet to continue.",
+                            "Wallet"));
+                    Application.Current.Dispatcher.Invoke(() => Application.Current.Shutdown());
                 }
-                catch (AggregateException ex) when (ex.GetBaseException() is RpcClientUnknownException)
+
+
+                var acc = accs.FirstOrDefault(a => a == publicKey);
+                if (acc == null)
                 {
-                    Thread.Sleep(1000);
-                    failCounter++;
-
-                    if (failCounter > 10)
-                        throw;
+                    Application.Current.Dispatcher.Invoke(() => MessageBox.Show(
+                        "Failed to automatically open the new wallet. Try manually opening the wallet.",
+                        "Wallet"));
+                    return;
                 }
-                catch (RpcClientUnknownException ex)
+
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    Thread.Sleep(1000);
-                    failCounter++;
-
-                    if (failCounter > 10)
-                        throw;
-                }
+                    var wall = new AddressVM { PublicKey = acc };
+                    Address = wall;
+                    SelectTab("Wallet");
+                });
             }
-
-          
-
-
+            catch (Exception ex)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                    MessageBox.Show("Error talking to the backend service: " + ex.Message, "Wallet"));
+            }
         }
 
 
@@ -159,14 +245,15 @@ namespace WTCWallet
         private void NewAccount(object obj)
         {
            NewAddressWindow window = new NewAddressWindow();
-            var vm = new NewAddressVM((success) =>
+            var vm = new NewAddressVM((key) =>
             {
                 window.Close();
 
-                if (success)
+                if (!String.IsNullOrWhiteSpace(key))
                 {
-                    LoadAccounts(true);
+                    LoadAccounts(key);
                 }
+
             });
             window.DataContext = vm;
             window.Owner = Application.Current.MainWindow;
@@ -181,16 +268,66 @@ namespace WTCWallet
 
         private void OpenAccount(object obj)
         {
-            
-        }
-
-        private void UpdateMinerStatus(AddressVM address, string val)
-        {
-            MiningStatus = val;
-
-            foreach (var item in Addresses)
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Filter = "All files (*.*)|*.*";
+            dialog.Title = "Select Wallet Location";
+            dialog.CheckFileExists = true;
+            if (dialog.ShowDialog() == DialogResult.OK)
             {
-                item.CanMine = !address.IsMining || address == item;
+                if (dialog.FileName != "")
+                {
+                    if (!File.Exists(dialog.FileName))
+                    {
+                        MessageBox.Show("File at " + dialog.FileName + " does not exist.", "Wallet");
+                    }
+                    else
+                    {
+                        var service = new KeyStoreService();
+
+                        string address = null;
+
+                        try
+                        {
+                            address = service.GetAddressFromKeyStore(File.ReadAllText(dialog.FileName));
+                        }
+                        catch (Exception)
+                        {
+                            MessageBox.Show("Failed to read the wallet.", "Wallet");
+                            return;
+                        }
+
+                        address = "0x" + address;
+
+                        var nodeFolder = Task.Run(() => AppVM.Geth.Admin.Datadir.SendRequestAsync()).Result;
+
+                        var keyStoreFolder = Path.Combine(nodeFolder, "keysotres");
+
+                        if (!Directory.Exists(keyStoreFolder))
+                        {
+                            keyStoreFolder = Path.Combine(nodeFolder, "keystores");
+                        }
+
+                        if (!Directory.Exists(keyStoreFolder))
+                        {
+                            Application.Current.Dispatcher.Invoke(() => MessageBox.Show("Error finding keystore folder.", "Wallet", MessageBoxButton.OK, MessageBoxImage.Error));
+                            return;
+                        }
+
+                        var files = Directory.GetFiles(keyStoreFolder, "*.*", SearchOption.TopDirectoryOnly);
+
+                        foreach (var file in files)
+                        {
+                            if (File.Exists(file))
+                            {
+                                File.Delete(file);
+                            }
+                        }
+
+                        File.Copy(dialog.FileName, Path.Combine(keyStoreFolder, Path.GetFileName(dialog.FileName)));
+
+                        LoadAccounts(address);
+                    }
+                }
             }
         }
 
@@ -217,6 +354,41 @@ namespace WTCWallet
                 OnPropertyChanged();
             }
         }
+        private int _miningSliderValue;
+        private string _miningSliderText;
+        private string _usdPrice;
+        private string _btcPrice;
+        private decimal _percent24HourChange;
+        private bool _isPercentPositive;
+
+        public Int32 MaxMiningThreads { get; set; }
+
+        public Int32 MiningSliderValue
+        {
+            get { return _miningSliderValue; }
+            set
+            {
+                if (_miningSliderValue == value)
+                    return;
+                _miningSliderValue = value;
+                OnPropertyChanged();
+
+                MiningSliderText = MiningSliderValue + "/" + MaxMiningThreads;
+            }
+        }
+
+        public String MiningSliderText
+        {
+            get { return _miningSliderText; }
+            set
+            {
+                _miningSliderText = value;
+                OnPropertyChanged();
+            }
+        }
+
+
+        public Boolean HasAddress { get { return Address != null; } }
 
         public AddressVM Address
         {
@@ -225,16 +397,21 @@ namespace WTCWallet
             {
                 if (_addressVm == value)
                     return;
+
+                if (_addressVm != null && _addressVm.IsMining)
+                {
+                    _addressVm.StopMiningCommand.Execute(null);
+                }
+
                 _addressVm = value;
                 Status = "Loading wallet";
                 Address.Load(() => Status = "Ready");
-                
+                OnPropertyChanged("ShowHome");
+                OnPropertyChanged("HasAddress");
                 OnPropertyChanged();
             }
         }
 
-
-        public ObservableCollection<AddressVM> Addresses { get; } = new ObservableCollection<AddressVM>();
 
         public static AppVM Instance
         {
@@ -250,6 +427,8 @@ namespace WTCWallet
                 return _instance;
             }
         }
+
+        public Action<string> SelectTab { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

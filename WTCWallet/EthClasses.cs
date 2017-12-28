@@ -148,6 +148,62 @@ namespace WTCWallet
             //   return accountsInfo;
         }
 
+        public IEnumerable<BlockVM> GetMinerBlocks(string address, int page)
+        {
+            //http://waltonchain.net/minerpagination/0xc0e4d8d1dC02cAA500D00E28f7aA7c68DE836450/1
+            WebClient client = new WebClient();
+
+            var str = "<Root>" + client.DownloadString(
+                          $"http://waltonchain.net/minerpagination/{address}/{page}") + "</Root>";
+
+            XmlDocument document = new XmlDocument();
+            document.LoadXml(str);
+
+            var table = document.GetElementsByTagName("table").OfType<XmlElement>().FirstOrDefault();
+
+            int rowCount = 0;
+
+            foreach (XmlElement row in table.ChildNodes)
+            {
+                if (rowCount++ == 0)
+                    continue;
+
+                int i = 0;
+                BlockVM vm = new BlockVM();
+                foreach (XmlElement rowChildNode in row.ChildNodes)
+                {
+                    if (i == 0)
+                    {
+                        vm.BlockNumber = rowChildNode.InnerText.Trim();
+                    }
+                    else if (i == 1)
+                    {
+                        vm.Hash = rowChildNode.InnerText.Trim();
+                    }
+                    else if (i == 2)
+                    {
+                        vm.Reward = rowChildNode.InnerText.Trim();
+                    }
+                    else if (i == 3)
+                    {
+                        vm.Difficulty = rowChildNode.InnerText.Trim();
+                    }
+                    else if (i == 4)
+                    {
+                        vm.Nounce = rowChildNode.InnerText.Trim();
+                    }
+                    else if (i == 5)
+                    {
+                        vm.Size = rowChildNode.InnerText.Trim();
+                    }
+
+                    i++;
+                }
+
+                yield return vm;
+            }
+        }
+
 
 
         public IEnumerable<TransactionVM> GetLatestTransactions(string address, int page)
@@ -179,11 +235,11 @@ namespace WTCWallet
                     {
                         vm.BlockNumber = rowChildNode.InnerText.Trim();
                     }
-                    if (i == 1)
+                    else if (i == 1)
                     {
                         vm.Hash = rowChildNode.InnerText.Trim();
                     }
-                    if (i == 2)
+                    else if (i == 2)
                     {
                         vm.Receiver = rowChildNode.InnerText.Trim();
 
@@ -200,7 +256,7 @@ namespace WTCWallet
                             vm.To = vm.Receiver;
                         }
                     }
-                    if (i == 3)
+                    else if (i == 3)
                     {
                         vm.Amount = rowChildNode.InnerText.Trim();
                     }

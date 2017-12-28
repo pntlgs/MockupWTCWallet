@@ -4,177 +4,506 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WTCWallet"
-        xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
-        mc:Ignorable="d"
-        Title="WaltonChain Wallet" Height="500" Width="1200" MinHeight="450" MinWidth="750" DataContext="{x:Static local:AppVM.Instance}" Icon="Resources/walton.png">
+        xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls" BorderBrush="#0D2E60" BorderThickness="2" NonActiveBorderBrush="#0D2E60" NonActiveWindowTitleBrush="{DynamicResource WindowTitleColorBrush}"
+        mc:Ignorable="d" Background="#081F40" ShowMaxRestoreButton="False" WindowStyle="SingleBorderWindow" ResizeMode="CanMinimize"
+        Title="WTC Wallet" Height="550" Width="1000" MinHeight="450" MinWidth="750" DataContext="{x:Static local:AppVM.Instance}" Icon="Resources/walton.png">
+    <!-- Initial design from StarlikeLOL-->
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
-        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <!--<Menu Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
-            <MenuItem Header="_File">
-                <MenuItem Header="New Address" Command="{Binding NewAccountCommand}"></MenuItem>
-                --><!--<MenuItem Header="Open Address" Command="{Binding OpenAccountCommand}"></MenuItem>--><!--
-            </MenuItem>
+        
+        <!--<Menu Grid.Row="0" Background="Transparent">
+           
+            <Menu.Items>
+                <MenuItem Header="_File" >
+                    <MenuItem Header="New Wallet" BorderThickness="0" Command="{Binding NewAccountCommand}"></MenuItem>
+                    <MenuItem Header="Open Wallet"  BorderThickness="0" Command="{Binding OpenAccountCommand}"></MenuItem>
+                </MenuItem>
+                <MenuItem Header="_Help">
+                    <MenuItem Header="About"  Click="MenuItem_OnClick"></MenuItem>
+                </MenuItem>
+            </Menu.Items>
         </Menu>-->
-
-        <Grid Grid.Row="1" Grid.Column="0" Margin="4">
+        <!--<Grid Grid.Row="1" Visibility="{Binding ShowHome, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"></ColumnDefinition>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                <ColumnDefinition Width="1*"></ColumnDefinition>
+                <ColumnDefinition Width="1.5*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <TextBlock Text="Addresses" HorizontalAlignment="Center" Grid.Column="1" FontSize="16" ></TextBlock>
-            <Button HorizontalAlignment="Left" Content="Add" Grid.Column="2" VerticalAlignment="Center" Margin="6 0 0 0" Command="{Binding NewAccountCommand}"></Button>
-        </Grid>
-        <ListView ItemsSource="{Binding Addresses}" Grid.Row="2" Grid.Column="0" SelectedItem="{Binding Address}">
-            <ListView.Resources>
-                <DataTemplate DataType="{x:Type local:AddressVM}">
-                    <TextBlock Text="{Binding PublicKey}"></TextBlock>
-                </DataTemplate>
-            </ListView.Resources>
-        </ListView>
-        <Grid Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" DataContext="{Binding Address}" Visibility="{Binding Converter={StaticResource NullToVisibilityConverter}}" Margin="4">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="*"></RowDefinition>
-            </Grid.RowDefinitions>
-            <StackPanel Orientation="Horizontal" Grid.Row="0">
-                <TextBlock Text="Public Address" Margin="5 0 0 0"  FontSize="20" VerticalAlignment="Center"></TextBlock>
-                <TextBlock VerticalAlignment="Center" Margin="5 0 0 0" ToolTip="View Public Address QR">
-                    <Hyperlink Command="{Binding ShowQRCodeCommand}">
-                        <Image Source="Resources/cffd1ef39c7807420fa75eea1aa38018.jpg" UseLayoutRounding="True" Height="16" Width="16"></Image>
-                    </Hyperlink>
-                </TextBlock>
-            </StackPanel>
-       
-            <TextBox IsReadOnly="True" Text="{Binding PublicKey}" Margin="5 0 23 0" Grid.Row="1" FontSize="14">
-                <TextBox.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Copy Public Address" Command="{Binding CopyPublicKeyCommand}"></MenuItem>
-                    </ContextMenu>
-                </TextBox.ContextMenu>
-            </TextBox>
+            <Image Source="Resources/largelogo.png" HorizontalAlignment="Center" VerticalAlignment="Center" UseLayoutRounding="True" Width="500" Grid.Column="0" Grid.Row="0"></Image>
+            <Border Grid.Column="1" Grid.Row="0" BorderThickness="1 0 0 0" BorderBrush="White">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
 
-            <TextBlock Text="Balance" Margin="5 0 0 0" Grid.Row="2" FontSize="20"></TextBlock>
-            <TextBox IsReadOnly="True" Text="{Binding Balance.Balance}" Margin="5 0 23 0" Grid.Row="3" FontSize="14">
-                <TextBox.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Copy Balance" Command="{Binding CopyBalanceCommand}"></MenuItem>
-                    </ContextMenu>
-                </TextBox.ContextMenu>
-            </TextBox>
+                    <TextBlock Text="RECENT WALLETS" FontFamily="{StaticResource Anton}" Foreground="White" FontSize="24" HorizontalAlignment="Center"></TextBlock>
+                </Grid>
+            </Border>
+        </Grid>-->
+        <!--<Grid Grid.Row="1" x:Name="WalletGrid"  Visibility="{Binding Address, Converter={StaticResource NullToVisibilityConverter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+                <ColumnDefinition Width="2.1*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition  Height="1*"></RowDefinition>
+                    <RowDefinition Height="1.3*"></RowDefinition>
+                </Grid.RowDefinitions>
 
-            <TextBlock Text="Last Refreshed" Margin="5 0 0 0" Grid.Row="4" FontSize="20"></TextBlock>
-            <TextBox IsReadOnly="True" Text="{Binding LastRefreshed}" Margin="5 0 23 0" Grid.Row="5" FontSize="14">
-                <TextBox.ContextMenu>
-                    <ContextMenu IsEnabled="False">
-                    </ContextMenu>
-                </TextBox.ContextMenu>
-            </TextBox>
-
-            <Separator Grid.Row="6" Margin="0 8 0 0"/>
-            <TabControl Grid.Row="7">
-
-                <TabItem Header="Transactions">
-                    <ScrollViewer PreviewMouseWheel="UIElement_OnPreviewMouseWheel">
-                        
-               
+                <Border BorderBrush="#0D2E60" BorderThickness="0 0 2 0" Grid.Row="1">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"></RowDefinition>
                             <RowDefinition Height="Auto"></RowDefinition>
-                        </Grid.RowDefinitions>
-                            <controls:ProgressRing IsActive="{Binding ShowTransactionsSpinner}" Grid.RowSpan="2" />
-                        <TextBlock Margin="5 0 0 0" FontSize="14" Text="There are no transactions on this address." Visibility="{Binding IsTransactionsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}"></TextBlock>
-                        <DataGrid CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False" AutoGenerateColumns="False" VerticalScrollBarVisibility="Hidden"  SelectedItem="{Binding Transaction}" IsReadOnly="True" SelectionMode="Single" Grid.Row="0" SelectionUnit="FullRow" ItemsSource="{Binding Transactions}" Visibility="{Binding IsTransactionsDone, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Block Number" Binding="{Binding BlockNumber}"></DataGridTextColumn>
-                                    <DataGridTextColumn Header="Transaction Hash" Binding="{Binding Hash}"></DataGridTextColumn>
-                                <DataGridTextColumn Header="Sender Address" Binding="{Binding Receiver, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                                <DataGridTextColumn Header="Amount" Binding="{Binding Amount}"></DataGridTextColumn>
-                                </DataGrid.Columns>
-                                <DataGrid.ContextMenu>
-                                    <ContextMenu>
-                                        <MenuItem Header="Open in WaltonChain Explorer" Command="{Binding OpenExplorerCommand}" />
-                                        <MenuItem Header="Copy Transaction Hash" Command="{Binding CopyTransactionHashCommand}" />
-                                    </ContextMenu>
-                                </DataGrid.ContextMenu>
-                            </DataGrid>
-                            <TextBlock Text="Note: Only recent transactions are shown." FontSize="12" Grid.Row="1" Visibility="{Binding IsTransactionsDone, Converter={StaticResource BooleanToVisibilityConverter}}"></TextBlock>
-                        </Grid>
-                    </ScrollViewer>
-                </TabItem>
-                <TabItem Header="Send WTC">
-                    <ScrollViewer >
-
-                        <Grid>
-                        <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"></RowDefinition>
-                            <RowDefinition Height="Auto"></RowDefinition>
-                            <RowDefinition Height="Auto"></RowDefinition>
-                            <RowDefinition Height="Auto"></RowDefinition>
-                            <RowDefinition Height="Auto"></RowDefinition>
-                            <RowDefinition Height="Auto"></RowDefinition>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"></ColumnDefinition>
-                                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="Send to Address:" Margin="5 2" Grid.Row="0" FontSize="14" Grid.ColumnSpan="2"></TextBlock>
-                            <TextBox Grid.Row="1" Margin="5 2" Text="{Binding SendAddress}"  FontSize="14"  Grid.ColumnSpan="2"></TextBox>
-                            <TextBlock Text="Amount:" Margin="5 2" Grid.Row="2"  FontSize="14"  Grid.ColumnSpan="2"></TextBlock>
-                            <TextBox Grid.Row="3" Margin="5 2" Text="{Binding SendAmount}"  FontSize="14" Grid.Column="0"></TextBox>
-                            <Button Grid.Row="3" Margin="5 2" Content="Entire Balance" Grid.Column="1" Command="{Binding EntireBalanceCommand}"></Button>
-                            <Button Grid.Row="4" Margin="5 7 5 2" Content="Send" Command="{Binding SendCommand}"  Grid.ColumnSpan="2"></Button>
-                            <Grid Background="{DynamicResource AccentColorBrush}"  Grid.ColumnSpan="2" Grid.Row="5" Margin="5" Visibility="{Binding ShowSendSuccess, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBlock Foreground="White" Text="The transaction has been sent. Check the Transactions tab for progress." Margin="4"></TextBlock>
-                            </Grid>
-                        </Grid>
-                    </ScrollViewer>
-                </TabItem>
-                <TabItem Header="Mining" IsEnabled="False">
-                    <ScrollViewer>
-                        <Grid IsSharedSizeScope="True">
-                        <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"></RowDefinition>
                             <RowDefinition Height="Auto"></RowDefinition>
                         </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="MiningLabel"></ColumnDefinition>
-                            <ColumnDefinition Width="Auto"></ColumnDefinition>
-                            <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" Margin="5 0 0 0" FontSize="14" VerticalAlignment="Center" Text="Thread Count:" HorizontalAlignment="Right"></TextBlock>
-                        <Slider Width="200" Style="{DynamicResource FlatSlider}" Value="{Binding MiningSliderValue}" Margin="5" Grid.Row="0" Grid.Column="1" Minimum="1" Maximum="{Binding MaxMiningThreads}" TickFrequency="1" TickPlacement="BottomRight" IsSnapToTickEnabled="True" Height="15"></Slider>
-                        <TextBlock Text="{Binding MiningSliderText}" Grid.Row="0" Grid.Column="2" Margin="5"></TextBlock>
-                        <Button Content="{Binding StartMiningCommand.Label}" IsEnabled="{Binding CanMine}" Width="100" Margin="4" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="1" Command="{Binding StartMiningCommand}"></Button>
+                        <TextBlock Text="BALANCE"  FontFamily="{StaticResource Anton}" FontWeight="SemiBold" Foreground="#BEC0C5" FontSize="16" Margin="0 20 0 0" HorizontalAlignment="Center" Grid.Row="0"></TextBlock>
+                        <TextBlock Text="{Binding Address.Balance.Balance, StringFormat={}{0} WTC}"  FontFamily="{StaticResource Anton}" TextWrapping="Wrap" Foreground="#00BDFD" FontSize="30" FontWeight="Bold" HorizontalAlignment="Center" Grid.Row="1"></TextBlock>
+                        <TextBox Grid.Row="2" Margin="20 15 20 5" FontFamily="{StaticResource Anton}" controls:TextBoxHelper.Watermark="Receiver Address" Text="{Binding Address.SendAddress}"></TextBox>
+                        <TextBox Grid.Row="3" Margin="20 5" controls:TextBoxHelper.Watermark="Amount to Send" FontFamily="{StaticResource Anton}" Text="{Binding Address.SendAmount}"></TextBox>
+                        <Button Grid.Row="4" Content="SEND WTC" Command="{Binding Address.SendCommand}"  FontFamily="{StaticResource Anton}" Margin="20 5" FontSize="16"></Button>
                     </Grid>
-                    </ScrollViewer>
-                </TabItem>
-            </TabControl>
-        </Grid>
-        <StatusBar Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">
-            <StatusBarItem>
-                <TextBlock Text="Version 0.1" FontSize="14" />
-            </StatusBarItem>
-            <Separator  />
-            <StatusBarItem>
-                <TextBlock Text="{Binding MiningStatus}" FontSize="14"/>
-            </StatusBarItem>
-        </StatusBar>
+                </Border>
+                <Border BorderBrush="#0D2E60" BorderThickness="0 0 2 0" Grid.Row="2">
+                    <Grid >
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="215"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                        </Grid.RowDefinitions>
+
+                        <Image Source="{Binding Address.PublicQRCode}"  HorizontalAlignment="Center" Grid.Row="0" Margin="4 4 4 16" UseLayoutRounding="True"></Image>
+                        <TextBlock TextTrimming="CharacterEllipsis" Grid.Row="1" Text="{Binding Address.PublicKey}" ToolTip="{Binding Address.PublicKey}"  Foreground="#D6D6D7" FontFamily="{StaticResource Anton}" FontSize="18" Margin="8 15 8 8" FontWeight="Bold" HorizontalAlignment="Center">
+                            <TextBlock.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Copy Public Address" Command="{Binding Address.CopyPublicKeyCommand}"></MenuItem>
+                                </ContextMenu>
+                            </TextBlock.ContextMenu>
+                        </TextBlock>
+                    </Grid>
+                </Border>
+            </Grid>
+            <Grid Grid.Column="1">
+                <Border  BorderBrush="#0D2E60" BorderThickness="0 0 0 0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2.0*"></ColumnDefinition>
+                            <ColumnDefinition Width="1*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*"></RowDefinition>
+                            <RowDefinition Height="1*"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Border BorderBrush="#103977" BorderThickness="0 0 2 0" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"></RowDefinition>
+                                    <RowDefinition Height="1*"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <TextBlock HorizontalAlignment="Center" Text="TRANSACTION HISTORY" FontFamily="{StaticResource Anton}" FontSize="14" FontWeight="SemiBold"  Margin="0 20 0 0" Foreground="#DAD9D9"></TextBlock>
+                                <DataGrid Margin="5 10 5 0" Background="#081F40" HorizontalScrollBarVisibility="Disabled" FontFamily="{StaticResource Anton}" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False" AutoGenerateColumns="False" VerticalScrollBarVisibility="Hidden"  SelectedItem="{Binding Address.Transaction}" IsReadOnly="True" SelectionMode="Single" Grid.Row="1" SelectionUnit="FullRow" ItemsSource="{Binding Address.Transactions}" Visibility="{Binding Address.IsTransactionsDone, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <DataGrid.Resources>
+                                        <Style TargetType="{x:Type TextBlock}">
+                                            <Setter Property="TextTrimming" Value="CharacterEllipsis"></Setter>
+                                        </Style>
+                                    </DataGrid.Resources>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Block #" Binding="{Binding BlockNumber}"></DataGridTextColumn>
+                                        <DataGridTextColumn Header="Transaction Hash" Binding="{Binding HashShort}"></DataGridTextColumn>
+                                        <DataGridTextColumn Header="Sender Address" Binding="{Binding ReceiverShort, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                                        <DataGridTextColumn Header="Amount" Binding="{Binding Amount}"></DataGridTextColumn>
+                                    </DataGrid.Columns>
+                                    <DataGrid.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Open in WaltonChain Explorer" Command="{Binding Address.OpenExplorerCommand}" />
+                                            <MenuItem Header="Copy Transaction Hash" Command="{Binding Address.CopyTransactionHashCommand}" />
+                                            <MenuItem Header="Copy Sender Address" Command="{Binding Address.CopySenderAddressCommand}" />
+                                        </ContextMenu>
+                                    </DataGrid.ContextMenu>
+                                </DataGrid>
+                            </Grid>
+
+                        </Border>
+
+                        <Border BorderBrush="#0D2E60" BorderThickness="0 2 0 0" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                            <Grid Margin="6">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"></RowDefinition>
+                                    <RowDefinition Height="*"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3*"></ColumnDefinition>
+                                    <ColumnDefinition Width="1.3*"></ColumnDefinition>
+                                    <ColumnDefinition Width="1.3*"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <Grid Grid.Row="0"  Grid.Column="0" Background="#00BEFF" >
+                                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Address.MiningStatus}"></TextBlock>
+                                </Grid>
+                                <Button Grid.Row="0" Grid.Column="1" Margin="5 0 0 0" FontSize="14" FontFamily="{DynamicResource Anton}" IsEnabled="{Binding Address.IsNotMining}" Command="{Binding  Address.StartMiningCommand}" Content="Start Mining"></Button>
+                                <Button Grid.Row="0" Grid.Column="2" FontSize="14" Margin="5 0 0 0" FontFamily="{DynamicResource Anton}"  IsEnabled="{Binding Address.IsMining}" Command="{Binding Address.StopMiningCommand}" Content="Stop Mining"></Button>
+                                <DataGrid Margin="0 5 0 0" Background="#081F40" FontFamily="{StaticResource Anton}" Grid.Column="0" Grid.ColumnSpan="3" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False" AutoGenerateColumns="False" VerticalScrollBarVisibility="Hidden"  SelectedItem="{Binding Transaction}" IsReadOnly="True" SelectionMode="Single" Grid.Row="1" SelectionUnit="FullRow" ItemsSource="{Binding Transactions}" Visibility="{Binding IsTransactionsDone, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Block #"></DataGridTextColumn>
+                                        <DataGridTextColumn Header="Hash"></DataGridTextColumn>
+                                        <DataGridTextColumn Header="Reward"></DataGridTextColumn>
+                                        <DataGridTextColumn Header="Difficulty"></DataGridTextColumn>
+                                        <DataGridTextColumn Header="Nonce"></DataGridTextColumn>
+                                        <DataGridTextColumn Header="Size"></DataGridTextColumn>
+                                    </DataGrid.Columns>
+                                    <DataGrid.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Open in WaltonChain Explorer" Command="{Binding OpenExplorerCommand}" />
+                                            <MenuItem Header="Copy Transaction Hash" Command="{Binding CopyTransactionHashCommand}" />
+                                        </ContextMenu>
+                                    </DataGrid.ContextMenu>
+                                </DataGrid>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>-->
+        <controls:HamburgerMenu x:Name="HamburgerMenuControl"
+                                Foreground="White" Grid.RowSpan="2"
+                                PaneBackground="{DynamicResource AccentColorBrush}"
+                                IsPaneOpen="False"
+                                ItemClick="HamburgerMenuControl_OnItemClick"
+                                OptionsItemClick="HamburgerMenuControl_OnItemClick"
+                                DisplayMode="Inline"  Grid.Row="0"  ItemTemplate="{DynamicResource MenuItemTemplate}"
+                                OptionsItemTemplate="{DynamicResource MenuItemTemplate}">
+            <controls:HamburgerMenu.Resources>
+                <DataTemplate x:Key="MenuItemTemplate" DataType="{x:Type controls:HamburgerMenuGlyphItem}">
+                    <Grid Height="48">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="48" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   FontSize="16"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   Text="{Binding Glyph}">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Foreground" Value="White"></Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsEnabled}" Value="False">
+                                            <Setter Property="Foreground" Value="DarkGray"></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock Grid.Column="1"
+                                   VerticalAlignment="Center"
+                                   FontSize="16"
+                                   Text="{Binding Label}">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Foreground" Value="White"></Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsEnabled}" Value="False">
+                                            <Setter Property="Foreground" Value="DarkGray"></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </DataTemplate>
+            </controls:HamburgerMenu.Resources>
+            <controls:HamburgerMenu.ContentTemplate>
+                <DataTemplate DataType="{x:Type controls:HamburgerMenuItem}">
+                    <Grid x:Name="TheContentGrid">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <!--<Border Grid.Row="0"
+                                Background="#081F40">
+                            <TextBlock x:Name="Header"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontSize="24"
+                                       Foreground="White"
+                                       Text="{Binding Label}" />
+                        </Border>-->
+                        <ContentControl x:Name="TheContent"
+                                        Grid.Row="1"
+                                        Focusable="False"
+                                        Foreground="{DynamicResource BlackBrush}"
+                                        Content="{Binding Tag}" />
+                    </Grid>
+                </DataTemplate>
+            </controls:HamburgerMenu.ContentTemplate>
+            <controls:HamburgerMenu.ItemsSource>
+                <controls:HamburgerMenuItemCollection>
+                    <controls:HamburgerMenuGlyphItem Glyph="" Label="Home">
+                        <controls:HamburgerMenuGlyphItem.Tag>
+                            <Grid Grid.Row="1" DataContext="{x:Static local:AppVM.Instance}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*"></ColumnDefinition>
+                                    <ColumnDefinition Width="1.5*"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <Image Source="Resources/largelogo.png" HorizontalAlignment="Center" VerticalAlignment="Center" UseLayoutRounding="True" Width="500" Grid.Column="0" Grid.Row="0"></Image>
+                                <Border Grid.Column="1" Grid.Row="0" BorderThickness="1 0 0 0" BorderBrush="White">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="1*"></RowDefinition>
+                                            <RowDefinition Height="7.6*"></RowDefinition>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1*"></ColumnDefinition>
+                                            <ColumnDefinition  Width="1*"></ColumnDefinition>
+                                            <ColumnDefinition  Width="1*"></ColumnDefinition>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.Row="0" Grid.Column="0" Background="Transparent" BorderThickness="0 0 1 1" BorderBrush="White">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"></RowDefinition>
+                                                    <RowDefinition Height="Auto"></RowDefinition>
+                                                </Grid.RowDefinitions>
+                                                <TextBlock Text="USD Price" Grid.Row="0" Foreground="White" Margin="0 5 0 0" FontSize="16" HorizontalAlignment="Center"></TextBlock>
+                                                <TextBlock  Text="{Binding USDPrice}" Grid.Row="1" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20"></TextBlock>
+                                            </Grid>
+                                        </Border>
+                                        <Border Grid.Row="0" Grid.Column="1" Background="Transparent" BorderThickness="0 0 1 1" BorderBrush="White">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"></RowDefinition>
+                                                    <RowDefinition Height="Auto"></RowDefinition>
+                                                </Grid.RowDefinitions>
+                                                <TextBlock Text="BTC Price" Grid.Row="0" Foreground="White" Margin="0 5 0 0" FontSize="16" HorizontalAlignment="Center"></TextBlock>
+                                                <TextBlock  Text="{Binding BTCPrice}" Grid.Row="1" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20"></TextBlock>
+                                            </Grid>
+                                        </Border>
+                                        <Border Grid.Row="0" Grid.Column="2" Background="Transparent" BorderThickness="0 0 1 1" BorderBrush="White">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"></RowDefinition>
+                                                    <RowDefinition Height="Auto"></RowDefinition>
+                                                </Grid.RowDefinitions>
+                                                <TextBlock Text="24 Hour Change %" Grid.Row="0" Foreground="White" Margin="0 5 0 0" FontSize="16" HorizontalAlignment="Center"></TextBlock>
+                                                <TextBlock  Text="{Binding Percent24HourChange, StringFormat={}{0}%}" Grid.Row="1" Foreground="#D14836" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="{x:Type TextBlock}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsPercentPositive}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#009933"></Setter>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Grid>
+                                        </Border>
+                                        <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0" Grid.ColumnSpan="3">
+                                            <Button Content="CREATE WALLET" Padding="10" controls:ControlsHelper.ContentCharacterCasing="Upper"  Command="{Binding NewAccountCommand}" Margin="10" FontFamily="{StaticResource Anton}" FontSize="28"></Button>
+                                            <Button Content="OPEN WALLET" Padding="10" controls:ControlsHelper.ContentCharacterCasing="Upper" Command="{Binding OpenAccountCommand}" Margin="10" FontFamily="{StaticResource Anton}" FontSize="28"></Button>
+                                           
+                                            <TextBlock Foreground="White" Text="Version: 0.2" HorizontalAlignment="Center" Margin="10"></TextBlock>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                        </controls:HamburgerMenuGlyphItem.Tag>
+                    </controls:HamburgerMenuGlyphItem>
+
+                    <controls:HamburgerMenuGlyphItem Glyph="" Label="Wallet">
+                        <controls:HamburgerMenuGlyphItem.Tag>
+                            <Grid Grid.Row="1" x:Name="WalletGrid"  Visibility="{Binding Address, Converter={StaticResource NullToVisibilityConverter}}" DataContext="{x:Static local:AppVM.Instance}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*"></ColumnDefinition>
+                                    <ColumnDefinition Width="2.1*"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <Grid Grid.Column="0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"></RowDefinition>
+                                        <RowDefinition  Height="1*"></RowDefinition>
+                                        <RowDefinition Height="1.3*"></RowDefinition>
+                                    </Grid.RowDefinitions>
+
+                                    <Border BorderBrush="#0D2E60" BorderThickness="0 0 2 0" Grid.Row="1">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"></RowDefinition>
+                                                <RowDefinition Height="Auto"></RowDefinition>
+                                                <RowDefinition Height="Auto"></RowDefinition>
+                                                <RowDefinition Height="Auto"></RowDefinition>
+                                                <RowDefinition Height="Auto"></RowDefinition>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"></ColumnDefinition>
+                                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Text="BALANCE"  FontFamily="{StaticResource Anton}" FontWeight="SemiBold" Foreground="#BEC0C5" FontSize="16" Margin="0 20 0 0" HorizontalAlignment="Center" Grid.Row="0"></TextBlock>
+                                            <TextBlock Grid.Column="0" Grid.ColumnSpan="2"  Text="{Binding Address.Balance.Balance, StringFormat={}{0} WTC}"  FontFamily="{StaticResource Anton}" TextWrapping="Wrap" Foreground="#00BDFD" FontSize="30" FontWeight="Bold" HorizontalAlignment="Center" Grid.Row="1"></TextBlock>
+                                            <TextBox  Grid.Column="0" Grid.ColumnSpan="2"  Grid.Row="2" Margin="20 15 20 5" FontFamily="{StaticResource Anton}" controls:TextBoxHelper.Watermark="Receiver Address" Text="{Binding Address.SendAddress}"></TextBox>
+                                            <TextBox Grid.Column="0" Grid.Row="3" Margin="20 5 10 5" controls:TextBoxHelper.Watermark="Amount to Send" FontFamily="{StaticResource Anton}" Text="{Binding Address.SendAmount}"></TextBox>
+                                            <Button Grid.Row="3" Margin="0 5 20 5" Content="Entire Balance" FontFamily="{StaticResource Anton}" Grid.Column="1" Command="{Binding Address.EntireBalanceCommand}"></Button>
+
+                                            <Button  Grid.Column="0" Grid.ColumnSpan="2"  Grid.Row="4" Content="SEND WTC" Command="{Binding Address.SendCommand}"  FontFamily="{StaticResource Anton}" Margin="20 5" FontSize="16"></Button>
+                                        </Grid>
+                                    </Border>
+                                    <Border BorderBrush="#0D2E60" BorderThickness="0 0 2 0" Grid.Row="2">
+                                        <Grid >
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="215"></RowDefinition>
+                                                <RowDefinition Height="*"></RowDefinition>
+                                            </Grid.RowDefinitions>
+
+                                            <Image Source="{Binding Address.PublicQRCode}"  HorizontalAlignment="Center" Grid.Row="0" Margin="4 4 4 16" UseLayoutRounding="True"></Image>
+                                            <TextBlock TextTrimming="CharacterEllipsis" Grid.Row="1" Text="{Binding Address.PublicKey}" ToolTip="{Binding Address.PublicKey}"  Foreground="#D6D6D7" FontFamily="{StaticResource Anton}" FontSize="18" Margin="8 15 8 8" FontWeight="Bold" HorizontalAlignment="Center">
+                                                <TextBlock.ContextMenu>
+                                                    <ContextMenu>
+                                                        <MenuItem Header="Copy Public Address" Command="{Binding Address.CopyPublicKeyCommand}"></MenuItem>
+                                                    </ContextMenu>
+                                                </TextBlock.ContextMenu>
+                                            </TextBlock>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                                <Grid Grid.Column="1">
+                                    <Border  BorderBrush="#0D2E60" BorderThickness="0 0 0 0">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="2.0*"></ColumnDefinition>
+                                                <ColumnDefinition Width="1*"></ColumnDefinition>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="1*"></RowDefinition>
+                                                <RowDefinition Height="1*"></RowDefinition>
+                                            </Grid.RowDefinitions>
+                                            <Border BorderBrush="#103977" BorderThickness="0 0 2 0" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"></RowDefinition>
+                                                        <RowDefinition Height="1*"></RowDefinition>
+                                                    </Grid.RowDefinitions>
+                                                    <TextBlock HorizontalAlignment="Center" Text="TRANSACTION HISTORY" FontFamily="{StaticResource Anton}" FontSize="14" FontWeight="SemiBold"  Margin="0 20 0 0" Foreground="#DAD9D9"></TextBlock>
+                                                    <!--<TextBlock Grid.Row="1" Foreground="White" FontSize="14" FontFamily="{StaticResource Anton}" Text="There are no transactions for this wallet." Margin="5 4" Visibility="{Binding Address.IsTransactionsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}"></TextBlock>-->
+                                                    <controls:ProgressRing IsActive="{Binding Address.ShowTransactionsSpinner}" Grid.Row="1" />
+                                                    <DataGrid Margin="5 10 5 0"   Background="#081F40"  Foreground="White" AlternatingRowBackground="#092246" RowBackground="#092953" HorizontalScrollBarVisibility="Disabled" FontFamily="{StaticResource Anton}" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False" AutoGenerateColumns="False" VerticalScrollBarVisibility="Hidden"  SelectedItem="{Binding Address.Transaction}" IsReadOnly="True" SelectionMode="Single" Grid.Row="1" SelectionUnit="FullRow" ItemsSource="{Binding Address.Transactions}" Visibility="{Binding Address.IsTransactionsDone, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                        <DataGrid.Resources>
+                                                            <Style TargetType="{x:Type TextBlock}">
+                                                                <Setter Property="TextTrimming" Value="CharacterEllipsis"></Setter>
+                                                            </Style>
+                                                        </DataGrid.Resources>
+                                                        <DataGrid.Columns>
+                                                            <DataGridTextColumn Header="Block #" Binding="{Binding BlockNumber}"></DataGridTextColumn>
+                                                            <DataGridTextColumn Header="Transaction Hash" Binding="{Binding HashShort}"></DataGridTextColumn>
+                                                            <DataGridTextColumn Header="Sender Address" Binding="{Binding ReceiverShort, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                                                            <DataGridTextColumn Header="Amount" Binding="{Binding Amount}"></DataGridTextColumn>
+                                                        </DataGrid.Columns>
+                                                        <DataGrid.ContextMenu>
+                                                            <ContextMenu Visibility="{Binding Address.HasTransaction, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                                <MenuItem Header="Open in WaltonChain Explorer" Command="{Binding Address.OpenExplorerCommand}" />
+                                                                <MenuItem Header="Copy Transaction Hash" Command="{Binding Address.CopyTransactionHashCommand}" />
+                                                                <MenuItem Header="Copy Sender Address" Command="{Binding Address.CopySenderAddressCommand}" />
+                                                            </ContextMenu>
+                                                        </DataGrid.ContextMenu>
+                                                    </DataGrid>
+                                                </Grid>
+
+                                            </Border>
+
+                                            <Border BorderBrush="#0D2E60" BorderThickness="0 2 0 0" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                                                <Grid Margin="6">
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"></RowDefinition>
+                                                        <RowDefinition Height="*"></RowDefinition>
+                                                        <RowDefinition Height="Auto"></RowDefinition>
+                                                    </Grid.RowDefinitions>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="3*"></ColumnDefinition>
+                                                        <ColumnDefinition Width="1.3*"></ColumnDefinition>
+                                                        <ColumnDefinition Width="1.3*"></ColumnDefinition>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Grid Grid.Row="0"  Grid.Column="0" Background="#00BEFF" >
+                                                        <TextBlock HorizontalAlignment="Center" FontWeight="SemiBold" VerticalAlignment="Center" Text="{Binding Address.MiningStatus}"></TextBlock>
+                                                    </Grid>
+                                                    <Button Grid.Row="0" Grid.Column="1" Margin="5 0 0 0" FontSize="14" FontFamily="{DynamicResource Anton}" IsEnabled="{Binding Address.IsNotMining}" Command="{Binding  Address.StartMiningCommand}" Content="Start Mining"></Button>
+                                                    <Button Grid.Row="0" Grid.Column="2" FontSize="14" Margin="5 0 0 0" FontFamily="{DynamicResource Anton}"  IsEnabled="{Binding Address.IsMining}" Command="{Binding Address.StopMiningCommand}" Content="Stop Mining"></Button>
+                                                    <controls:ProgressRing IsActive="{Binding Address.ShowTransactionsSpinner}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" />
+                                                    <DataGrid Margin="0 5 0 0" Foreground="White" AlternatingRowBackground="#092246" RowBackground="#092953"  Background="#081F40" FontFamily="{StaticResource Anton}" Grid.Column="0" Grid.ColumnSpan="3" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False" AutoGenerateColumns="False" VerticalScrollBarVisibility="Hidden"  SelectedItem="{Binding Address.MinerBlock}" IsReadOnly="True" SelectionMode="Single" Grid.Row="1" SelectionUnit="FullRow" ItemsSource="{Binding Address.MinerBlocks}" Visibility="{Binding Address.IsTransactionsDone, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                        <DataGrid.Columns>
+                                                            <DataGridTextColumn Header="Block #"></DataGridTextColumn>
+                                                            <DataGridTextColumn Header="Hash"></DataGridTextColumn>
+                                                            <DataGridTextColumn Header="Reward"></DataGridTextColumn>
+                                                            <DataGridTextColumn Header="Difficulty"></DataGridTextColumn>
+                                                            <DataGridTextColumn Header="Nonce"></DataGridTextColumn>
+                                                            <DataGridTextColumn Header="Size"></DataGridTextColumn>
+                                                        </DataGrid.Columns>
+                                                        <DataGrid.ContextMenu>
+                                                            <ContextMenu  Visibility="{Binding Address.HasBlock, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                                <MenuItem Header="Open in WaltonChain Explorer" Command="{Binding Address.MinerBlock.OpenExplorerCommand}" />
+                                                            </ContextMenu>
+                                                        </DataGrid.ContextMenu>
+                                                    </DataGrid>
+                                                    <TextBlock Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding Address.NodeStatus}" Grid.Row="2" Foreground="White" FontFamily="{StaticResource Anton}" FontSize="16" HorizontalAlignment="Center"></TextBlock>
+                                                </Grid>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </controls:HamburgerMenuGlyphItem.Tag>
+                    </controls:HamburgerMenuGlyphItem>
+
+                    <controls:HamburgerMenuGlyphItem Glyph="" Label="Settings">
+                        <controls:HamburgerMenuGlyphItem.Tag>
+                            <Grid DataContext="{x:Static local:AppVM.Instance}" IsSharedSizeScope="True" Margin="10 40 0 0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="MiningLabel"></ColumnDefinition>
+                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"></RowDefinition>
+                                    <RowDefinition Height="Auto"></RowDefinition>
+                                    <RowDefinition Height="Auto"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Foreground="White" Margin="5 0 0 0" FontSize="24" VerticalAlignment="Center" Text="Settings" Grid.ColumnSpan="3" HorizontalAlignment="Left"></TextBlock>
+                                <TextBlock Grid.Row="1" Grid.Column="0" Foreground="White" Margin="5 0 0 0" FontSize="14" VerticalAlignment="Center" Text="Mining Thread Count:" HorizontalAlignment="Left"></TextBlock>
+                                <Slider HorizontalAlignment="Left" Width="200" Style="{DynamicResource FlatSlider}" Foreground="White"  Value="{Binding MiningSliderValue}" Margin="5" Grid.Row="1" Grid.Column="1" Minimum="1" Maximum="{Binding MaxMiningThreads}" TickFrequency="1" TickPlacement="BottomRight" IsSnapToTickEnabled="True" Height="15"></Slider>
+                                <TextBlock Text="{Binding MiningSliderText}" Grid.Row="1" Foreground="White" HorizontalAlignment="Left" Grid.Column="2" Margin="5"></TextBlock>
+                                <TextBlock Grid.Row="2" Margin="5 0 0 0" Grid.Column="0" Grid.ColumnSpan="3" Text="If you change the thread count while mining, it will not take effect until you stop and start mining again." Foreground="White" ></TextBlock>
+                            </Grid>
+                        </controls:HamburgerMenuGlyphItem.Tag>
+                    </controls:HamburgerMenuGlyphItem>
+                </controls:HamburgerMenuItemCollection>
+            </controls:HamburgerMenu.ItemsSource>
+
+            <!--  Options  -->
+            <controls:HamburgerMenu.OptionsItemsSource>
+                <controls:HamburgerMenuItemCollection>
+                    <controls:HamburgerMenuGlyphItem Glyph="" Label="About">
+                        <controls:HamburgerMenuGlyphItem.Tag>
+                            <Grid DataContext="{x:Static local:AppVM.Instance}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"></RowDefinition>
+                                    <RowDefinition Height="Auto"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="Code by lgs" Foreground="White" HorizontalAlignment="Center" Margin="10" FontSize="18"></TextBlock>
+                                <TextBlock Grid.Row="1" Text="Design by StarlikeLOL" Foreground="White" HorizontalAlignment="Center" Margin="10" FontSize="18"></TextBlock>
+                            </Grid>
+                        </controls:HamburgerMenuGlyphItem.Tag>
+                    </controls:HamburgerMenuGlyphItem>
+                </controls:HamburgerMenuItemCollection>
+            </controls:HamburgerMenu.OptionsItemsSource>
+        </controls:HamburgerMenu>
     </Grid>
 </controls:MetroWindow>

@@ -35,6 +35,7 @@ namespace WTCWallet
                     return;
                 _from = value; 
                 OnPropertyChanged();
+                OnPropertyChanged("FromShort");
             }
         }
 
@@ -47,6 +48,33 @@ namespace WTCWallet
                     return;
                 _to = value;
                 OnPropertyChanged();
+                OnPropertyChanged("ToShort");
+            }
+        }
+
+        public String FromShort
+        {
+            get
+            {
+                if (From?.Length <= 10 || From == null)
+                {
+                    return From;
+                }
+
+                return From.Substring(0, 5) + "..." + From.Substring(From.Length - 5);
+            }
+        }
+
+        public String ToShort
+        {
+            get
+            {
+                if (To?.Length <= 10 || To == null)
+                {
+                    return To;
+                }
+
+                return To.Substring(0, 5) + "..." + To.Substring(To.Length - 5);
             }
         }
 
@@ -64,6 +92,17 @@ namespace WTCWallet
 
         public String Hash { get; set; }
 
+        public String HashShort
+        {
+            get
+            {
+                if (Hash.Length <= 30 || Hash == null)
+                    return Hash;
+
+                return Hash.Substring(0, 15) + "..." + Hash.Substring(Hash.Length - 15);
+            }
+        }
+
         public String Receiver
         {
             get { return _receiver; }
@@ -73,6 +112,20 @@ namespace WTCWallet
                     return;
                 _receiver = value;
                 OnPropertyChanged();
+                OnPropertyChanged("ReceiverShort");
+            }
+        }
+
+        public String ReceiverShort
+        {
+            get
+            {
+
+                if (Receiver.Length <= 30 || Receiver == null)
+                    return Receiver;
+
+                return Receiver.Substring(0, 15) + "..." + Receiver.Substring(Receiver.Length - 15);
+
             }
         }
 

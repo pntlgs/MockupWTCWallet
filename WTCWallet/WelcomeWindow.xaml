@@ -3,9 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls" ShowInTaskbar="False"
-        mc:Ignorable="d" BorderThickness="1" BorderBrush="White" WindowStyle="ToolWindow" ResizeMode="NoResize" SizeToContent="WidthAndHeight"
-        Title="Unofficial WTC Wallet" Height="300" Width="300">
+        xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls" ShowInTaskbar="False" NonActiveBorderBrush="#0D2E60" NonActiveWindowTitleBrush="{DynamicResource WindowTitleColorBrush}" BorderThickness="4" BorderBrush="#0D2E60" 
+        mc:Ignorable="d" ResizeMode="NoResize"  SizeToContent="WidthAndHeight" ShowMaxRestoreButton="False" ShowMinButton="False" ShowCloseButton="True" Closing="WelcomeWindow_OnClosing"
+        Title="Unofficial WTC Wallet" Height="450" Width="700">
     <Grid Margin="5" MaxWidth="650">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -35,12 +35,14 @@
                 <TextBlock Grid.Row="5" Margin="4 2" FontSize="18" Text="This wallet reuses parts of the official wallet and puts a new UI on it." TextWrapping="Wrap"></TextBlock>
             </Grid>
         </GroupBox>
-        <GroupBox Header="Setup" Grid.Row="1">
+        <GroupBox Header="Setup Checklist" Grid.Row="1">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
                 </Grid.RowDefinitions>
-                <TextBlock Text="Please wait while the blockchain is downloaded." x:Name="LoadingMessage" Grid.Row="6" FontSize="18"></TextBlock>
+                <CheckBox IsEnabled="False" Content="Waiting for the wallet service to start" x:Name="ServiceCheckBox" Grid.Row="0" FontSize="18"></CheckBox>
+                <CheckBox IsEnabled="False" Content="Waiting for the blockchain to download" x:Name="DownloadCheckBox" Margin="0 5 0 0" Grid.Row="1" FontSize="18"></CheckBox>
             </Grid>
         </GroupBox>
 

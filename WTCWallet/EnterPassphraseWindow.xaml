@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:WTCWallet"
         xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
         ShowInTaskbar="False"
-        mc:Ignorable="d"  WindowStyle="ToolWindow" ResizeMode="NoResize" SizeToContent="WidthAndHeight" BorderThickness="1" BorderBrush="White"
+        mc:Ignorable="d"  WindowStyle="ToolWindow" ResizeMode="NoResize" SizeToContent="WidthAndHeight" NonActiveBorderBrush="#0D2E60" NonActiveWindowTitleBrush="{DynamicResource WindowTitleColorBrush}" BorderThickness="4" BorderBrush="#0D2E60" 
         Title="Enter Passphrase" Height="300" Width="300">
     <Grid Margin="5">
         <Grid.RowDefinitions>

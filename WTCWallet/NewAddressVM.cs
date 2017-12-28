@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Forms;
 using NBitcoin;
 using Nethereum.Geth;
 using WTCWallet.Annotations;
@@ -16,12 +17,16 @@ using Nethereum.KeyStore.Model;
 using Nethereum.Signer;
 using Nethereum.Web3;
 using Newtonsoft.Json;
+using Application = System.Windows.Application;
+using Clipboard = System.Windows.Clipboard;
+using MessageBox = System.Windows.MessageBox;
+using TextDataFormat = System.Windows.TextDataFormat;
 
 namespace WTCWallet
 {
     public class NewAddressVM : INotifyPropertyChanged
     {
-        private readonly Action<Boolean> _closeWindow;
+        private readonly Action<String> _closeWindow;
         private string _seed;
         private string _confirmSeed;
         private string _publicAddress;
@@ -44,10 +49,41 @@ namespace WTCWallet
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public NewAddressVM(Action<Boolean> closeWindow)
+        public NewAddressVM(Action<String> closeWindow)
         {
             _closeWindow = closeWindow;
             Init();
+        }
+
+        public BaseCommand SelectSaveLocationCommand
+        {
+            get { return _selectSaveLocationCommand ?? (_selectSaveLocationCommand = new BaseCommand(ShowFileDialog)); }
+        }
+
+        private void ShowFileDialog(object obj)
+        {
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            saveFileDialog1.Filter = "All files (*.*)|*.*";
+            saveFileDialog1.Title = "Select Wallet Save Location";
+            saveFileDialog1.AddExtension = true;
+            saveFileDialog1.FileName = Guid.NewGuid().ToString("N").Take(5).Select(a => a.ToString()).Aggregate((a,b) => a.ToString() + b.ToString()) + "-" + DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss") + ".wallet";
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                if (saveFileDialog1.FileName != "")
+                {
+                    SavePath = saveFileDialog1.FileName;
+                }
+            }
+        }
+
+        public string SavePath
+        {
+            get { return _savePath; }
+            set
+            {
+                _savePath = value;
+                OnPropertyChanged();
+            }
         }
 
         public String Passphrase
@@ -125,7 +161,7 @@ namespace WTCWallet
 
         private void Close(object obj)
         {
-            _closeWindow(true);
+            _closeWindow(PublicAddress);
         }
 
         public Boolean ShowPrivateKey
@@ -154,6 +190,27 @@ namespace WTCWallet
             }
         }
 
+        private readonly object _lock = new object();
+        private bool _isBusy;
+        private string _savePath;
+        private BaseCommand _selectSaveLocationCommand;
+
+   
+        public Boolean IsBusy
+        {
+            get { return _isBusy; }
+            set
+            {
+                _isBusy = value;
+                OnPropertyChanged();
+                OnPropertyChanged("IsDoingNothing");
+            }
+        }
+
+        public Boolean IsDoingNothing { get { return !IsBusy; } }
+
+
+
         private void Create(object obj)
         {
             if (String.IsNullOrWhiteSpace(Passphrase))
@@ -168,116 +225,94 @@ namespace WTCWallet
                 return;
             }
 
-            PublicAddress = AppVM.Geth.Personal.NewAccount.SendRequestAsync(Passphrase).GetAwaiter().GetResult();
-
-            var service = new KeyStoreService();
-            IKeyStoreService<Pbkdf2Params> ss = new KeyStorePbkdf2Service();
-            //var test = service.EncryptAndGenerateDefaultKeyStoreAsJson(Passphrase, PrivateKeyBytes, PublicAddress);
-            //service.DecryptKeyStoreFromFile();
-
-            var nodeFolder = Task.Run(() => AppVM.Geth.Admin.Datadir.SendRequestAsync()).Result;
-
-            var keyStoreFolder = Path.Combine(nodeFolder, "keysotres");
-
-            if (!Directory.Exists(keyStoreFolder))
+            if (String.IsNullOrWhiteSpace(SavePath))
             {
-                keyStoreFolder = Path.Combine(nodeFolder, "keystores");
-            }
-
-            if (!Directory.Exists(keyStoreFolder))
-            {
-                MessageBox.Show("Error finding keystore folder.");
+                MessageBox.Show("Please select a file location to save your wallet to.", "Wallet", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            var files = Directory.GetFiles(keyStoreFolder, "*.*", SearchOption.TopDirectoryOnly);
-
-            string selectedFileText = null;
-
-            foreach (var file in files)
+            if (File.Exists(SavePath))
             {
-                selectedFileText = File.ReadAllText(file);
-
-                var address = service.GetAddressFromKeyStore(selectedFileText);
-
-                if (address == PublicAddress.Substring(2))
+                if (MessageBox.Show(
+                        "There is already an existing wallet at " + SavePath +
+                        ".\r\nAre you sure you want to overwrite it?", "Wallet", MessageBoxButton.YesNo,
+                        MessageBoxImage.Error) == MessageBoxResult.No)
                 {
-                    break;
+                    return;
+                }
+            }
+
+            var folder = Directory.GetParent(SavePath);
+            folder.Create();
+
+            IsBusy = true;
+
+            Task.Run(() =>
+            {
+                var publicAddress = AppVM.Geth.Personal.NewAccount.SendRequestAsync(Passphrase).GetAwaiter().GetResult();
+
+                var service = new KeyStoreService();
+
+                var nodeFolder = Task.Run(() => AppVM.Geth.Admin.Datadir.SendRequestAsync()).Result;
+
+                var keyStoreFolder = Path.Combine(nodeFolder, "keysotres");
+
+                if (!Directory.Exists(keyStoreFolder))
+                {
+                    keyStoreFolder = Path.Combine(nodeFolder, "keystores");
                 }
 
-                selectedFileText = null;
-            }
+                if (!Directory.Exists(keyStoreFolder))
+                {
+                    Application.Current.Dispatcher.Invoke(() => IsBusy = false);
+                    Application.Current.Dispatcher.Invoke(() => MessageBox.Show("Error finding keystore folder.", "Wallet", MessageBoxButton.OK, MessageBoxImage.Error));
+                    return;
+                }
 
-            if (String.IsNullOrWhiteSpace(selectedFileText))
-            {
-                MessageBox.Show("Failed to create address", "Wallet", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+                var files = Directory.GetFiles(keyStoreFolder, "*.*", SearchOption.TopDirectoryOnly);
 
-            var bytes = service.DecryptKeyStoreFromJson(Passphrase, selectedFileText);
+                string selectedFilePath = null;
 
-            PrivateKey = bytes.ToHex(true);
+                foreach (var file in files)
+                {
+                    var address = service.GetAddressFromKeyStore(File.ReadAllText(file));
 
-            ShowPrivateKey = true;
-            ShowCreateButton = false;
-            ShowCloseButton = true;
-            ////using the simple key store service
-            //var service = new KeyStoreService();
-            //var test = service.EncryptAndGenerateDefaultKeyStoreAsJson(Passphrase, PrivateKeyBytes, PublicAddress);
+                    if (address == publicAddress.Substring(2))
+                    {
+                        selectedFilePath = file;
+                        break;
+                    }
+                }
 
-            //var fileName = DateTime.UtcNow.ToString("UTC--yyyy-MM-dd_hh-mm-ss-fff") + ".wallet";
+                if (String.IsNullOrWhiteSpace(selectedFilePath))
+                {
+                    Application.Current.Dispatcher.Invoke(() => IsBusy = false);
+                    Application.Current.Dispatcher.Invoke(() => MessageBox.Show("Failed to create wallet", "Wallet", MessageBoxButton.OK, MessageBoxImage.Error));
+                    return;
+                }
 
-            //File.WriteAllText(Path.Combine(keyStoreFolder, fileName), test);
+                File.Copy(selectedFilePath, SavePath, true);
 
-            //Thread.Sleep(5000);
+                var bytes = service.DecryptKeyStoreFromJson(Passphrase, File.ReadAllText(SavePath));
 
-            //int retryCount = 0;
-            //bool success = false;
+                foreach (var file in files)
+                {
+                    if (file != selectedFilePath)
+                    {
+                        File.Delete(file);
+                    }
+                }
 
-            //while (true)
-            //{
-            //    if (retryCount++ >= 20)
-            //    {
-            //        File.Delete(Path.Combine(keyStoreFolder, fileName));
-            //        MessageBox.Show("Failed to create the address/wallet.", "Wallet", MessageBoxButton.OK, MessageBoxImage.Information);
-            //        break;
-            //    }
-
-            //    try
-            //    {
-            //        var accounts = AppVM.Geth.Personal.ListAccounts.SendRequestAsync().GetAwaiter().GetResult();
-
-            //        if (accounts.Contains(PublicAddress.ToLower()))
-            //        {
-
-            //           // var result = Task.Run(() =>
-            //            //        AppVM.Geth.Personal.UnlockAccount.SendRequestAsync(PublicAddress.ToLower(), Passphrase, 1))
-            //            //    .Result;
-
-            //           // if (result)
-            //           // {
-            //                success = true;
-            //                break;
-            //           // }
-            //        }
-            //        else
-            //        {
-            //            Thread.Sleep(1000);
-            //        }
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        // AppVM.RestartBackend();
-
-            //        //    Thread.Sleep(2000);
-            //        Thread.Sleep(1000);
-            //    }
-
-
-            //}
-
-
-
-            //   _closeWindow(success);
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    PublicAddress = publicAddress;
+                    PrivateKey = bytes.ToHex(true);
+                    ShowPrivateKey = true;
+                    ShowCreateButton = false;
+                    ShowCloseButton = true;
+                    IsBusy = false;
+                });
+            });
         }
 
         public string PrivateKey

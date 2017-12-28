@@ -9,25 +9,25 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media.Imaging;
 using Nethereum.Hex.HexTypes;
+using Nethereum.JsonRpc.Client;
 using WTCWallet.Annotations;
 
 namespace WTCWallet
 {
     public class AddressVM : INotifyPropertyChanged
     {
-        private readonly Action<AddressVM, string> _updateMinerStatus;
         private bool _isTransactionsLoading;
-        private bool _isTransactionsDone;
+        private bool _isTransactionsDone = true;
         private BaseCommand _startMiningCommand;
-        private int _miningSliderValue;
-        private string _miningSliderText;
+  
         private bool _isMining;
         private bool _canMine = true;
         private BaseCommand _showQrCodeCommand;
         private BaseCommand _sendCommand;
         private string _sendAddress;
-        private decimal _sendAmount;
+        private decimal? _sendAmount;
         private BaseCommand _copyBalanceCommand;
         private BaseCommand _copyPublicKeyCommand;
         private TransactionVM _transaction;
@@ -51,6 +51,20 @@ namespace WTCWallet
         }
 
         public ObservableCollection<TransactionVM> Transactions { get; } = new ObservableCollection<TransactionVM>();
+        public ObservableCollection<BlockVM> MinerBlocks { get; } = new ObservableCollection<BlockVM>();
+
+        public BlockVM MinerBlock
+        {
+            get { return _minerBlock; }
+            set
+            {
+                _minerBlock = value;
+                OnPropertyChanged();
+                OnPropertyChanged("HasBlock");
+            }
+        }
+
+        public Boolean HasBlock => MinerBlock != null;
 
         public TransactionVM Transaction
         {
@@ -59,8 +73,11 @@ namespace WTCWallet
             {
                 _transaction = value; 
                 OnPropertyChanged();
+                OnPropertyChanged("HasTransaction");
             }
         }
+
+        public Boolean HasTransaction {  get { return Transaction != null; } }
 
         public String LastRefreshed
         {
@@ -77,6 +94,19 @@ namespace WTCWallet
             get { return _openExplorerCommand ?? (_openExplorerCommand= new BaseCommand(OpenInExplorer)); }
         }
 
+        public BaseCommand CopySenderAddressCommand
+        {
+            get { return _copySenderAddressCommand ?? (_copySenderAddressCommand = new BaseCommand(CopySenderAddress)); }
+        }
+
+        private void CopySenderAddress(object obj)
+        {
+            if (Transaction == null)
+                return;
+
+            Clipboard.SetText(Transaction.Receiver, TextDataFormat.Text);
+        }
+
         public BaseCommand CopyTransactionHashCommand
         {
             get { return _copyTransactionHashCommand ?? (_copyTransactionHashCommand = new BaseCommand(CopyTransactionHash)); }
@@ -84,11 +114,17 @@ namespace WTCWallet
 
         private void CopyTransactionHash(object obj)
         {
+            if (Transaction == null)
+                return;
+
             Clipboard.SetText(Transaction.Hash, TextDataFormat.Text);
         }
 
         private void OpenInExplorer(object obj)
         {
+            if (Transaction == null)
+                return;
+
             if (Transaction.IsPending)
             {
                 MessageBox.Show("This transaction was still pending last time it was checked. \r\nIf the explorer shows an 'Internal Server Error' it means the transaction has not been included in a block yet.", "WTC", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -124,10 +160,22 @@ namespace WTCWallet
 
         private void Send(object obj)
         {
+            if (NodeCount == 0)
+            {
+                MessageBox.Show("You are connected to 0 nodes. Wait until you are connected to at least one node before sending.", "Wallet", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
 
             if (!Regex.IsMatch(SendAddress, "^0x[a-fA-F0-9]{40}$"))
             {
                 MessageBox.Show("Send to Address is not a valid address.", "WTC Wallet", MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return;
+            }
+
+            if (SendAmount == null)
+            {
+                MessageBox.Show("You must enter an amount to send.", "WTC Wallet", MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 return;
             }
@@ -166,14 +214,16 @@ namespace WTCWallet
 
                
 
-                var amount = SendAmount * (decimal)Math.Pow(10, 18);
+                var amount = SendAmount.Value * (decimal)Math.Pow(10, 18);
 
                 var id = Task.Run(() => AppVM.Geth.Eth.TransactionManager.SendTransactionAsync(PublicKey, SendAddress, new HexBigInteger(new BigInteger(amount)))).Result;
 
                 Transactions.Insert(0, new TransactionVM {Hash = id, Amount = SendAmount.ToString(), Receiver = SendAddress, BlockNumber = "Pending", IsPending = true, Type = "Send WTC", From = PublicKey, To = SendAddress});
 
+                Task.Run(() => AppVM.Geth.Personal.LockAccount.SendRequestAsync(PublicKey)).Wait();
+
                 ShowSendSuccess = true;
-                SendAmount = 0;
+                SendAmount = null;
                 SendAddress = String.Empty;
 
                 Task.Run(() =>
@@ -215,6 +265,11 @@ namespace WTCWallet
         private bool _showTransactionsSpinner;
         private BaseCommand _entireBalanceCommand;
         private AccountToken _balance;
+        private BaseCommand _copySenderAddressCommand;
+        private BaseCommand _stopMiningCommand;
+        private string _miningStatus = "MINING STATUS: NOT MINING";
+        private string _nodeStatus = "CONNECTED NODES: 0";
+        private BlockVM _minerBlock;
 
         private void LoadTransactions(Boolean showSpinner, Action loaded = null)
         {
@@ -225,7 +280,7 @@ namespace WTCWallet
 
                 IsTransactionsLoading = true;
                 ShowTransactionsSpinner = showSpinner;
-                IsTransactionsDone = !showSpinner && Transactions.Count > 0;
+                IsTransactionsDone = !showSpinner;// && Transactions.Count > 0;
                 IsTransactionsEmpty = !showSpinner && Transactions.Count == 0;
             }
 
@@ -249,7 +304,33 @@ namespace WTCWallet
                         }
                     }
 
+                    foreach (var blockVM in Service.GetMinerBlocks(PublicKey, 1).ToList())
+                    {
+                        var tr = MinerBlocks.FirstOrDefault(t => t.Hash == blockVM.Hash);
+                        if (tr == null)
+                        {
+                            Application.Current.Dispatcher.Invoke(() => MinerBlocks.Add(blockVM));
+                        }
+                    }
+
                     LastRefreshed = DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToString("HH:mm:ss");
+
+                    try
+                    {
+                        NodeCount = AppVM.Geth.Admin.Peers.SendRequestAsync().GetAwaiter().GetResult().Children()
+                            .Count();
+                        NodeStatus = "CONNECTED NODES: " + NodeCount;
+                    }
+                    catch (RpcClientUnknownException ex)
+                    {
+                        NodeCount = 0;
+                        NodeStatus = "The wallet service is no longer running. Please restart the wallet.";
+
+                        if (IsMining)
+                        {
+                            MiningStatus = "MINING STATUS: NOT MINING (DISCONNECTED)";
+                        }
+                    }
 
                     if (loaded != null)
                         Application.Current.Dispatcher.Invoke(() => loaded());
@@ -260,7 +341,7 @@ namespace WTCWallet
                     {
                         IsTransactionsLoading = false;
                         ShowTransactionsSpinner = false;
-                        IsTransactionsDone = Transactions.Count > 0;
+                        IsTransactionsDone = true;
                         IsTransactionsEmpty = Transactions.Count == 0;
                     }
 
@@ -268,7 +349,7 @@ namespace WTCWallet
             });
         }
 
-        public Decimal SendAmount
+        public Decimal? SendAmount
         {
             get { return _sendAmount; }
             set
@@ -314,17 +395,43 @@ namespace WTCWallet
             set { _isTransactionsLoading = value; OnPropertyChanged();}
         }
 
-        public AddressVM(Action<AddressVM, string> updateMinerStatus)
+        public AddressVM()
         {
-            _updateMinerStatus = updateMinerStatus;
 
-            MaxMiningThreads = Environment.ProcessorCount;
-            MiningSliderValue = MaxMiningThreads;
         }
 
         public BaseCommand StartMiningCommand
         {
             get { return _startMiningCommand ?? (_startMiningCommand = new BaseCommand(StartMining) {Label = "Start Mining"}); }
+        }
+
+        public BaseCommand StopMiningCommand
+        {
+            get { return _stopMiningCommand ?? (_stopMiningCommand = new BaseCommand(StopMining) {Label = "Stop Mining"}); }
+        }
+
+        private void StopMining(object obj)
+        {
+            IsMining = false;
+
+
+
+            try
+            {
+
+
+                AppVM.Geth.Miner.Stop.SendRequestAsync().GetAwaiter().GetResult();
+
+                //var unlockAccountResult =
+                //    Task.Run(() => AppVM.Geth.Personal.LockAccount.SendRequestAsync(PublicKey)).Result;
+            }
+            catch (Exception)
+            {
+                
+            }
+            //    Service.StopMining(PublicKey, Password);
+            StartMiningCommand.Label = "Start Mining";
+            MiningStatus = "MINING STATUS: NOT MINING";
         }
 
         public Boolean CanMine
@@ -374,63 +481,99 @@ namespace WTCWallet
             Clipboard.SetText(Balance.Balance.ToString(), TextDataFormat.Text);
         }
 
+        public String MiningStatus
+        {
+            get { return _miningStatus; }
+            set
+            {
+                _miningStatus = value; 
+                OnPropertyChanged();
+            }
+        }
+
         public Boolean IsMining
         {
             get { return _isMining; }
-            set { _isMining = value; }
+            set
+            {
+                _isMining = value; 
+                OnPropertyChanged();
+                OnPropertyChanged("IsNotMining");
+            }
         }
+
+        public Boolean IsNotMining { get { return !IsMining; } }
 
         private void StartMining(object obj)
         {
-            if (StartMiningCommand.Label == "Start Mining")
+            if (NodeCount == 0)
             {
-                IsMining = true;
-                _updateMinerStatus(this, "Starting miner for " + PublicKey);
-                //       Service.StartMining(PublicKey, Password, MiningSliderValue);
-                StartMiningCommand.Label = "Stop Mining";
-                string includeS = MiningSliderValue == 1 ? "" : "s";
-                _updateMinerStatus(this, $"Running {MiningSliderValue} mining thread{includeS} for " + PublicKey);
+                MessageBox.Show("You are connected to 0 nodes. Wait until you are connected to at least one node before mining.", "Wallet", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
             }
-            else
+
+            if (AppVM.Instance.MiningSliderValue > 8)
             {
-                IsMining = false;
-                _updateMinerStatus(this, "Stoping miner for " + PublicKey);
-                //   Service.StopMining(PublicKey, Password);
-                StartMiningCommand.Label = "Start Mining";
-                _updateMinerStatus(this, "No miner running");
+                if (MessageBox.Show($"You have selected {AppVM.Instance.MiningSliderValue} threads to mine with. This is likely to consume most of your system resources. Continue?", "Wallet", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+                    return;
             }
+
+            int value = AppVM.Instance.MiningSliderValue;
+
+            //EnterPassphraseWindow window = new EnterPassphraseWindow();
+            //window.Owner = Application.Current.MainWindow;
+            //window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            //EnterPassphraseVM vm = new EnterPassphraseVM(() => window.Close(), PublicKey);
+            //window.DataContext = vm;
+            //window.ShowDialog();
+
+            //if (!vm.Confirmed)
+            //{
+            //    return;
+            //}
+
+            //var unlockAccountResult =
+            //    Task.Run(() => AppVM.Geth.Personal.UnlockAccount.SendRequestAsync(PublicKey, vm.Passphrase, 1000)).Result;
+
+            try
+            {
+                AppVM.Geth.Miner.Start.SendRequestAsync(value).GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to start mining. Try closing and reopening this program to see if that fixes it.", "Wallet", MessageBoxButton.OK);
+                return;
+            }
+
+            Thread.Sleep(2000);
+
+            if (AppVM.ProcessID.HasValue)
+            {
+                try
+                {
+                    Process.GetProcessById(AppVM.ProcessID.Value);
+                }
+                catch (ArgumentException e)
+                {
+                    MessageBox.Show("The mining process has crashed. Please reopen the wallet.", "Wallet", MessageBoxButton.OK);
+                    Application.Current.Shutdown();
+                }
+            }
+
+            IsMining = true;
+
+
+            //   Service.StartMining(PublicKey, Password, MiningSliderValue);
+            StartMiningCommand.Label = "Stop Mining";
+            MiningStatus = "MINING STATUS: MINING";
         }
 
-        public Int32 MaxMiningThreads { get; set; }
+
 
         public Boolean IsTransactionsDone
         {
             get { return _isTransactionsDone; }
             set { _isTransactionsDone = value; OnPropertyChanged(); }
-        }
-
-        public Int32 MiningSliderValue
-        {
-            get { return _miningSliderValue; }
-            set
-            {
-                if (_miningSliderValue == value)
-                    return;
-                _miningSliderValue = value; 
-                OnPropertyChanged();
-
-                MiningSliderText = MiningSliderValue + "/" + 8;
-            }
-        }
-
-        public String MiningSliderText
-        {
-            get { return _miningSliderText; }
-            set
-            {
-                _miningSliderText = value;
-                OnPropertyChanged();
-            }
         }
 
         public Boolean ShowSendSuccess
@@ -447,14 +590,13 @@ namespace WTCWallet
 
         public void Load(Action loaded)
         {
+            PublicQRCode = PublicQRCodeVM.GetBitmap(PublicKey);
+
             LoadBalance();
 
             LoadTransactions(true);
 
-
-
             Timer.Start();
-
         }
 
         private void LoadBalance()
@@ -463,7 +605,18 @@ namespace WTCWallet
             Balance = info.WTC;
         }
 
-        public object PublicQRCode
+        public Int32 NodeCount { get; set; }
+        public string NodeStatus
+        {
+            get { return _nodeStatus; }
+            set
+            {
+                _nodeStatus = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public BitmapImage PublicQRCode
         {
             get;
             set;

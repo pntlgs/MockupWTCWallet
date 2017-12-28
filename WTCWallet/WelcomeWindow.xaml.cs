@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -17,6 +18,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using MahApps.Metro.Controls;
+using Nethereum.JsonRpc.Client;
 
 namespace WTCWallet
 {
@@ -28,10 +30,58 @@ namespace WTCWallet
         public WelcomeWindow()
         {
             InitializeComponent();
-            ShowCloseButton = false;
             
             Task.Run(() =>
             {
+                AppVM.RestartBackend();
+
+                int failCounter = 0;
+                while (true)
+                {
+                    if (failCounter >= 10)
+                        break;
+
+                    try
+                    {
+                        AppVM.Geth.Personal.ListAccounts.SendRequestAsync().GetAwaiter().GetResult();
+                        break;
+                    }
+                    catch (AggregateException ex) when (ex.GetBaseException() is RpcClientUnknownException)
+                    {
+                        Thread.Sleep(1000);
+                        failCounter++;
+
+                        if (failCounter > 10)
+                        {
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                ServiceCheckBox.Content = "The wallet service is failed to start.";
+                            });
+                            return;
+                        }
+                    }
+                    catch (RpcClientUnknownException ex)
+                    {
+                        Thread.Sleep(1000);
+                        failCounter++;
+
+                        if (failCounter > 10)
+                        {
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                ServiceCheckBox.Content = "The wallet service is failed to start.";
+                            });
+                            return;
+                        }
+                    }
+                }
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    ServiceCheckBox.Content = "The wallet service is running.";
+                    ServiceCheckBox.IsChecked = true;
+
+                });
                 while (true)
                 {
                     var t = AppVM.Geth.Eth.Blocks.GetBlockNumber.SendRequestAsync().GetAwaiter().GetResult();
@@ -43,15 +93,16 @@ namespace WTCWallet
                         {
                             Application.Current.Dispatcher.Invoke(() =>
                             {
-                                LoadingMessage.Text =
-                                    "Please wait while the blockchain is downloaded (" + syncResult.CurrentBlock.Value + " of " + syncResult.HighestBlock.Value + " blocks).";
+                                DownloadCheckBox.Content =
+                                    "The blockchain is downloading (" + syncResult.CurrentBlock.Value + " of " + syncResult.HighestBlock.Value + " blocks).";
                             });
                         }
                         else
                         {
                             Application.Current.Dispatcher.Invoke(() =>
                             {
-                                LoadingMessage.Text =
+                                DownloadCheckBox.IsChecked = true;
+                                DownloadCheckBox.Content =
                                     "The blockchain has finished downloading (" + t.Value + " blocks).";
                                 OKButton.IsEnabled = true;
                                 OKButton.ToolTip = null;
@@ -74,6 +125,14 @@ namespace WTCWallet
         private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
         {
            this.Close();
+        }
+
+        private void WelcomeWindow_OnClosing(object sender, CancelEventArgs e)
+        {
+            if (!OKButton.IsEnabled)
+            {
+                Application.Current.Shutdown();
+            }
         }
     }
 }

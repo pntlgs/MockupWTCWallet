@@ -17,10 +17,10 @@ namespace WTCWallet
             Generate();
         }
 
-        public void Generate()
+        public static BitmapImage GetBitmap(string key)
         {
             QRCodeGenerator qrGenerator = new QRCodeGenerator();
-            QRCodeData qrCodeData = qrGenerator.CreateQrCode(PublicKey, QRCodeGenerator.ECCLevel.Q);
+            QRCodeData qrCodeData = qrGenerator.CreateQrCode(key, QRCodeGenerator.ECCLevel.Q);
             QRCode qrCode = new QRCode(qrCodeData);
             var qrCodeImage = qrCode.GetGraphic(20);
             using (var memoryStream = new MemoryStream())
@@ -33,8 +33,13 @@ namespace WTCWallet
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
                 bitmap.EndInit();
                 bitmap.Freeze();
-                PublicQRCode = bitmap;
+               return bitmap;
             }
+        }
+
+        public void Generate()
+        {
+            PublicQRCode = GetBitmap(PublicKey);
         }
 
         public BaseCommand CopyPublicKeyCommand

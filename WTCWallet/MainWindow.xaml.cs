@@ -31,6 +31,39 @@ namespace WTCWallet
             Closing += OnClosing;
 
 Activated += OnLoaded;
+
+            HamburgerMenuControl.SelectedItem =
+                (HamburgerMenuControl.ItemsSource as HamburgerMenuItemCollection).FirstOrDefault();
+
+            ((AppVM) DataContext).SelectTab = SelectTab;
+        }
+
+        private void SelectTab(string label)
+        {
+            var coll = ((HamburgerMenuItemCollection)HamburgerMenuControl.ItemsSource);
+
+            var item = coll.FirstOrDefault(c => c.Label == label);
+            if (item != null)
+            {
+                this.HamburgerMenuControl.Content = item;
+                // close the pane
+                this.HamburgerMenuControl.IsPaneOpen = false;
+            }
+        }
+
+        private void HamburgerMenuControl_OnItemClick(object sender, ItemClickEventArgs e)
+        {
+            AppVM vm = (AppVM) DataContext;
+
+            if (!vm.HasAddress && ((HamburgerMenuGlyphItem)e.ClickedItem).Label == "Wallet")
+            {
+                return;
+            }
+
+            // set the content
+            this.HamburgerMenuControl.Content = e.ClickedItem;
+            // close the pane
+            this.HamburgerMenuControl.IsPaneOpen = false;
         }
 
         private Boolean hasShown = false;
@@ -62,10 +95,17 @@ Activated += OnLoaded;
         {
             if (AppVM.ProcessID.HasValue)
             {
-                var process = Process.GetProcessById(AppVM.ProcessID.Value);
-                if (process.ProcessName == "wtcbackend")
+                try
                 {
-                    process.Kill();
+                    var process = Process.GetProcessById(AppVM.ProcessID.Value);
+                    if (process.ProcessName == "walton")
+                    {
+                        process.Kill();
+                    }
+                }
+                catch (Exception)
+                {
+                    
                 }
             }
         }
@@ -77,6 +117,16 @@ Activated += OnLoaded;
                 scv.ScrollToVerticalOffset(scv.VerticalOffset - e.Delta);
                 e.Handled = true;
             
+        }
+
+        private void MenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            AboutWindow window = new AboutWindow();
+
+            window.Owner = this;
+            window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+
+            window.ShowDialog();
         }
     }
 }
